@@ -19,11 +19,11 @@ const CTASection = () => {
 
           <div className="relative z-10">
             <h2 className="text-3xl md:text-5xl font-display font-bold text-primary-foreground mb-4">
-              Ready to verify your next property?
+              Ready to inspect your next property?
             </h2>
             <p className="text-primary-foreground/70 text-lg max-w-xl mx-auto mb-8">
-              Join hundreds of diaspora buyers and investors who trust Chekam
-              for secure, remote property verification.
+              Join hundreds of buyers and investors who trust Chekam for
+              AI-powered verification, virtual inspections, and smart decision-making.
             </p>
 
             <Button variant="hero" size="lg" className="gap-2">
