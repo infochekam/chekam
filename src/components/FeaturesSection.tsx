@@ -5,15 +5,42 @@ import {
   Video,
   FileText,
   ShieldCheck,
-  CreditCard,
+  Link,
+  Camera,
+  Box,
+  BarChart3,
 } from "lucide-react";
 
 const features = [
+  {
+    icon: Link,
+    title: "Multi-Channel Submission",
+    description:
+      "Submit properties via document upload, listing URL, or manual entry—whatever's easiest for you.",
+  },
   {
     icon: FileSearch,
     title: "Document Verification",
     description:
       "OCR-powered analysis detects forged documents, ownership inconsistencies, and alteration patterns automatically.",
+  },
+  {
+    icon: Video,
+    title: "Video Walkthrough",
+    description:
+      "Our inspectors visit the property and record professional video walkthroughs so you can see every corner remotely.",
+  },
+  {
+    icon: Box,
+    title: "Interactive 3D Tours",
+    description:
+      "Get immersive 3D models of inspected properties. Explore rooms, measure spaces, and assess conditions virtually.",
+  },
+  {
+    icon: BarChart3,
+    title: "AI-Powered Scoring",
+    description:
+      "AI analyzes inspection photos, videos, and documents to auto-generate structural, legal, and market scores.",
   },
   {
     icon: Bot,
@@ -22,28 +49,22 @@ const features = [
       "Chat with our AI to interpret documents, understand risks, get valuations, and receive investment recommendations.",
   },
   {
-    icon: Video,
-    title: "Virtual Inspection",
-    description:
-      "Book remote inspections with certified inspectors. Receive video walkthroughs and structural condition scores.",
-  },
-  {
-    icon: FileText,
-    title: "Smart Reports",
-    description:
-      "Get comprehensive reports with Legal Risk Index, Ownership Score, Market Fairness, and Investment Rating.",
-  },
-  {
     icon: ShieldCheck,
     title: "Fraud Detection",
     description:
       "AI-driven pattern recognition flags suspicious listings, duplicate documents, and signature anomalies.",
   },
   {
-    icon: CreditCard,
-    title: "Flexible Payments",
+    icon: FileText,
+    title: "Smart Reports",
     description:
-      "Pay per verification case or subscribe for unlimited access. Supports Stripe, PayPal, and local gateways.",
+      "Get comprehensive PDF reports with Legal Risk Index, Structural Score, Market Fairness, and Investment Rating.",
+  },
+  {
+    icon: Camera,
+    title: "Photo Gallery & Evidence",
+    description:
+      "All inspection photos organized by room and category, with annotations highlighting key findings.",
   },
 ];
 
@@ -66,12 +87,12 @@ const FeaturesSection = () => {
             Features
           </span>
           <h2 className="text-3xl md:text-5xl font-display font-bold text-foreground mt-2">
-            Everything you need for{" "}
-            <span className="text-primary">secure</span> property deals
+            Verify, inspect & decide—
+            <span className="text-primary">all in one place</span>
           </h2>
           <p className="text-muted-foreground mt-4 max-w-2xl mx-auto">
-            From document analysis to virtual inspections, Chekam covers every
-            step of property due diligence.
+            From document verification to 3D virtual tours and AI scoring,
+            Chekam covers every step of property due diligence.
           </p>
         </div>
 

@@ -25,7 +25,7 @@ const HeroSection = () => {
           >
             <span className="inline-flex items-center gap-2 bg-secondary/20 text-secondary rounded-full px-4 py-1.5 text-sm font-medium mb-6 backdrop-blur-sm border border-secondary/30">
               <Shield size={14} />
-              AI-Powered Property Verification
+              AI-Powered Property Verification & Inspection
             </span>
           </motion.div>
 
@@ -35,8 +35,8 @@ const HeroSection = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.15 }}
           >
-            Buy Property with{" "}
-            <span className="text-secondary">Confidence</span>, from Anywhere
+            Verify, Inspect & Buy Property with{" "}
+            <span className="text-secondary">Confidence</span>
           </motion.h1>
 
           <motion.p
@@ -45,8 +45,7 @@ const HeroSection = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
           >
-            Chekam uses AI to verify documents, detect fraud, and score risk—so
-            you can make informed property decisions remotely.
+            Submit a property via documents, links, or manual entry. Our team inspects it with video walkthroughs and 3D tours, while AI scores every detail—so you can decide with confidence, from anywhere.
           </motion.p>
 
           <motion.div
@@ -56,7 +55,7 @@ const HeroSection = () => {
             transition={{ duration: 0.6, delay: 0.45 }}
           >
             <Button variant="hero" size="lg" className="gap-2">
-              Start Verification <ArrowRight size={18} />
+              Submit a Property <ArrowRight size={18} />
             </Button>
             <Button variant="hero-outline" size="lg" className="gap-2">
               <Play size={16} /> Watch Demo
@@ -65,18 +64,22 @@ const HeroSection = () => {
 
           {/* Trust indicators */}
           <motion.div
-            className="mt-12 flex items-center gap-8 text-primary-foreground/60 text-sm"
+            className="mt-12 flex flex-wrap items-center gap-8 text-primary-foreground/60 text-sm"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.6 }}
           >
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-green-400" />
-              500+ Properties Verified
+              500+ Properties Inspected
             </div>
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-green-400" />
-              98% Fraud Detection
+              3D Virtual Tours
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-green-400" />
+              AI-Powered Scoring
             </div>
           </motion.div>
         </div>

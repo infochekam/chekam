@@ -1,34 +1,41 @@
 import { motion } from "framer-motion";
-import { Upload, ScanSearch, BarChart3, FileCheck } from "lucide-react";
+import { Upload, ScanSearch, Video, BarChart3, Bot } from "lucide-react";
 
 const steps = [
   {
     icon: Upload,
     step: "01",
-    title: "Create a Case",
+    title: "Submit Property",
     description:
-      "Enter property details and upload documents—title deeds, survey plans, receipts—in one place.",
+      "Upload documents, paste a listing link, or enter property details manually to create a case.",
   },
   {
     icon: ScanSearch,
     step: "02",
-    title: "AI Verification",
+    title: "AI Document Check",
     description:
-      "Our AI scans documents for forgery, cross-checks ownership records, and flags inconsistencies.",
+      "Our AI scans documents for forgery, cross-checks ownership records, and flags inconsistencies instantly.",
+  },
+  {
+    icon: Video,
+    step: "03",
+    title: "Virtual Inspection",
+    description:
+      "Our team visits the property, records video walkthroughs, captures photos, and creates an interactive 3D tour.",
   },
   {
     icon: BarChart3,
-    step: "03",
-    title: "Risk Scoring",
+    step: "04",
+    title: "AI Scoring & Report",
     description:
-      "Receive a comprehensive risk score covering legal, ownership, structural, and market dimensions.",
+      "AI analyzes all media and documents to generate structural, legal, and market scores—delivered as a PDF report.",
   },
   {
-    icon: FileCheck,
-    step: "04",
-    title: "Get Your Report",
+    icon: Bot,
+    step: "05",
+    title: "AI Decision Assistant",
     description:
-      "Download a detailed PDF report or consult the AI assistant to clarify findings before you decide.",
+      "Chat with our AI to clarify findings, compare properties, and get personalized investment recommendations.",
   },
 ];
 
@@ -41,18 +48,18 @@ const HowItWorksSection = () => {
             How It Works
           </span>
           <h2 className="text-3xl md:text-5xl font-display font-bold text-foreground mt-2">
-            Four steps to a <span className="text-primary">verified</span> deal
+            Five steps to a <span className="text-primary">confident</span> decision
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
           {steps.map((s, i) => (
             <motion.div
               key={s.step}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: i * 0.15 }}
+              transition={{ duration: 0.5, delay: i * 0.12 }}
               className="relative text-center"
             >
               <div className="mx-auto w-16 h-16 rounded-2xl bg-primary text-primary-foreground flex items-center justify-center mb-4 shadow-lg">
