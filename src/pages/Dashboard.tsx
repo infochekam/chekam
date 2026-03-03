@@ -2,6 +2,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LogOut, Shield, User, Eye } from "lucide-react";
+import { Link } from "react-router-dom";
 import logo from "@/assets/chekamlogo.png";
 
 const Dashboard = () => {
@@ -49,8 +50,9 @@ const Dashboard = () => {
                 <Shield className="h-5 w-5 text-primary" />
                 <CardTitle className="text-base">Admin Panel</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-3">
                 <p className="text-sm text-muted-foreground">Manage users, inspections, and property reviews.</p>
+                <Button size="sm" asChild><Link to="/admin">Open Admin Panel</Link></Button>
               </CardContent>
             </Card>
           )}
