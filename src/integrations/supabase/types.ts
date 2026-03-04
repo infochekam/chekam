@@ -47,6 +47,95 @@ export type Database = {
         }
         Relationships: []
       }
+      properties: {
+        Row: {
+          address: string | null
+          city: string | null
+          created_at: string
+          description: string | null
+          id: string
+          property_link: string | null
+          property_type: string | null
+          state: string | null
+          status: Database["public"]["Enums"]["property_status"]
+          submission_method: Database["public"]["Enums"]["submission_method"]
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          address?: string | null
+          city?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          property_link?: string | null
+          property_type?: string | null
+          state?: string | null
+          status?: Database["public"]["Enums"]["property_status"]
+          submission_method: Database["public"]["Enums"]["submission_method"]
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          address?: string | null
+          city?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          property_link?: string | null
+          property_type?: string | null
+          state?: string | null
+          status?: Database["public"]["Enums"]["property_status"]
+          submission_method?: Database["public"]["Enums"]["submission_method"]
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      property_documents: {
+        Row: {
+          created_at: string
+          document_type: string | null
+          file_name: string
+          file_path: string
+          file_type: string | null
+          id: string
+          property_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          document_type?: string | null
+          file_name: string
+          file_path: string
+          file_type?: string | null
+          id?: string
+          property_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          document_type?: string | null
+          file_name?: string
+          file_path?: string
+          file_type?: string | null
+          id?: string
+          property_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_documents_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -83,6 +172,13 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "inspector" | "user"
+      property_status:
+        | "draft"
+        | "submitted"
+        | "under_review"
+        | "verified"
+        | "rejected"
+      submission_method: "document_upload" | "property_link" | "manual_entry"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -211,6 +307,14 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "inspector", "user"],
+      property_status: [
+        "draft",
+        "submitted",
+        "under_review",
+        "verified",
+        "rejected",
+      ],
+      submission_method: ["document_upload", "property_link", "manual_entry"],
     },
   },
 } as const
