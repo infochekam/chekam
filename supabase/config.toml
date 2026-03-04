@@ -1,1 +1,4 @@
 project_id = "plsagjetlabmdbvelugr"
+
+[functions.score-inspection]
+verify_jwt = false

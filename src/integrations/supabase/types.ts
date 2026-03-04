@@ -14,6 +14,129 @@ export type Database = {
   }
   public: {
     Tables: {
+      inspection_media: {
+        Row: {
+          created_at: string
+          file_name: string
+          file_path: string
+          file_type: string | null
+          id: string
+          inspection_id: string
+          label: string | null
+          media_type: string
+          uploaded_by: string
+        }
+        Insert: {
+          created_at?: string
+          file_name: string
+          file_path: string
+          file_type?: string | null
+          id?: string
+          inspection_id: string
+          label?: string | null
+          media_type?: string
+          uploaded_by: string
+        }
+        Update: {
+          created_at?: string
+          file_name?: string
+          file_path?: string
+          file_type?: string | null
+          id?: string
+          inspection_id?: string
+          label?: string | null
+          media_type?: string
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inspection_media_inspection_id_fkey"
+            columns: ["inspection_id"]
+            isOneToOne: false
+            referencedRelation: "inspections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inspection_scores: {
+        Row: {
+          category: string
+          created_at: string
+          id: string
+          inspection_id: string
+          remarks: string | null
+          score: number
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          id?: string
+          inspection_id: string
+          remarks?: string | null
+          score: number
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          id?: string
+          inspection_id?: string
+          remarks?: string | null
+          score?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inspection_scores_inspection_id_fkey"
+            columns: ["inspection_id"]
+            isOneToOne: false
+            referencedRelation: "inspections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inspections: {
+        Row: {
+          ai_summary: string | null
+          created_at: string
+          id: string
+          inspector_id: string | null
+          notes: string | null
+          overall_score: number | null
+          property_id: string
+          status: Database["public"]["Enums"]["inspection_status"]
+          updated_at: string
+        }
+        Insert: {
+          ai_summary?: string | null
+          created_at?: string
+          id?: string
+          inspector_id?: string | null
+          notes?: string | null
+          overall_score?: number | null
+          property_id: string
+          status?: Database["public"]["Enums"]["inspection_status"]
+          updated_at?: string
+        }
+        Update: {
+          ai_summary?: string | null
+          created_at?: string
+          id?: string
+          inspector_id?: string | null
+          notes?: string | null
+          overall_score?: number | null
+          property_id?: string
+          status?: Database["public"]["Enums"]["inspection_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inspections_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -172,6 +295,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "inspector" | "user"
+      inspection_status: "pending" | "in_progress" | "completed" | "scored"
       property_status:
         | "draft"
         | "submitted"
@@ -307,6 +431,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "inspector", "user"],
+      inspection_status: ["pending", "in_progress", "completed", "scored"],
       property_status: [
         "draft",
         "submitted",
