@@ -1,7 +1,7 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { LogOut, Shield, User, Eye, Plus } from "lucide-react";
+import { LogOut, Shield, User, Eye, Plus, Video } from "lucide-react";
 import { Link } from "react-router-dom";
 import logo from "@/assets/chekamlogo.png";
 
@@ -63,11 +63,23 @@ const Dashboard = () => {
                 <Eye className="h-5 w-5 text-secondary" />
                 <CardTitle className="text-base">Inspector Tools</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-3">
                 <p className="text-sm text-muted-foreground">Conduct virtual inspections and upload media.</p>
+                <Button size="sm" variant="secondary" asChild><Link to="/inspections">View Inspections</Link></Button>
               </CardContent>
             </Card>
           )}
+
+          <Card className="border-primary/20">
+            <CardHeader className="flex flex-row items-center gap-3 pb-2">
+              <Video className="h-5 w-5 text-primary" />
+              <CardTitle className="text-base">Virtual Inspections</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <p className="text-sm text-muted-foreground">View property inspections with AI-powered facility scoring.</p>
+              <Button size="sm" variant="outline" asChild><Link to="/inspections">Browse Inspections</Link></Button>
+            </CardContent>
+          </Card>
         </div>
 
         <Card className="border-dashed border-2 border-primary/20 hover:border-primary/40 transition-colors">

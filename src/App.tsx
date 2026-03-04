@@ -11,6 +11,8 @@ import ResetPassword from "./pages/ResetPassword";
 import Dashboard from "./pages/Dashboard";
 import Admin from "./pages/Admin";
 import SubmitProperty from "./pages/SubmitProperty";
+import Inspections from "./pages/Inspections";
+import Inspection from "./pages/Inspection";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,6 +31,8 @@ const App = () => (
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
             <Route path="/submit-property" element={<ProtectedRoute><SubmitProperty /></ProtectedRoute>} />
+            <Route path="/inspections" element={<ProtectedRoute><Inspections /></ProtectedRoute>} />
+            <Route path="/inspection/:id" element={<ProtectedRoute><Inspection /></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
