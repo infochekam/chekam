@@ -1,7 +1,7 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { LogOut, Shield, User, Eye } from "lucide-react";
+import { LogOut, Shield, User, Eye, Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 import logo from "@/assets/chekamlogo.png";
 
@@ -70,9 +70,13 @@ const Dashboard = () => {
           )}
         </div>
 
-        <Card>
-          <CardContent className="pt-6 text-center text-muted-foreground">
-            <p>Your property verification dashboard is ready. Submit a property to get started!</p>
+        <Card className="border-dashed border-2 border-primary/20 hover:border-primary/40 transition-colors">
+          <CardContent className="pt-6 text-center space-y-4">
+            <Plus className="h-10 w-10 mx-auto text-primary/60" />
+            <p className="text-muted-foreground">Submit a property for AI-powered verification.</p>
+            <Button asChild size="lg">
+              <Link to="/submit-property">Submit a Property</Link>
+            </Button>
           </CardContent>
         </Card>
       </main>
