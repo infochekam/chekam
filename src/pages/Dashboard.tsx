@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { LogOut, Shield, User, Eye, Plus, Video, FileSearch, Loader2 } from "lucide-react";
+import { LogOut, Shield, User, Eye, Plus, Video, FileSearch, Loader2, MessageSquare } from "lucide-react";
 import { Link } from "react-router-dom";
 import logo from "@/assets/chekamlogo.png";
 
@@ -106,6 +106,17 @@ const Dashboard = () => {
             <CardContent className="space-y-3">
               <p className="text-sm text-muted-foreground">View property inspections with AI-powered facility scoring.</p>
               <Button size="sm" variant="outline" asChild><Link to="/inspections">Browse Inspections</Link></Button>
+            </CardContent>
+          </Card>
+
+          <Card className="border-primary/20">
+            <CardHeader className="flex flex-row items-center gap-3 pb-2">
+              <MessageSquare className="h-5 w-5 text-primary" />
+              <CardTitle className="text-base">AI Assistant</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <p className="text-sm text-muted-foreground">Ask questions about your verification results and documents.</p>
+              <Button size="sm" variant="outline" asChild><Link to="/assistant">Chat with AI</Link></Button>
             </CardContent>
           </Card>
         </div>
