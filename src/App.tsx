@@ -13,6 +13,7 @@ import Admin from "./pages/Admin";
 import SubmitProperty from "./pages/SubmitProperty";
 import Inspections from "./pages/Inspections";
 import Inspection from "./pages/Inspection";
+import PropertyDocuments from "./pages/PropertyDocuments";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,6 +34,7 @@ const App = () => (
             <Route path="/submit-property" element={<ProtectedRoute><SubmitProperty /></ProtectedRoute>} />
             <Route path="/inspections" element={<ProtectedRoute><Inspections /></ProtectedRoute>} />
             <Route path="/inspection/:id" element={<ProtectedRoute><Inspection /></ProtectedRoute>} />
+            <Route path="/property/:propertyId/documents" element={<ProtectedRoute><PropertyDocuments /></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

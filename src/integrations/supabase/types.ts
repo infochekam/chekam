@@ -228,6 +228,9 @@ export type Database = {
           id: string
           property_id: string
           user_id: string
+          verification_result: Json | null
+          verification_status: string
+          verified_at: string | null
         }
         Insert: {
           created_at?: string
@@ -238,6 +241,9 @@ export type Database = {
           id?: string
           property_id: string
           user_id: string
+          verification_result?: Json | null
+          verification_status?: string
+          verified_at?: string | null
         }
         Update: {
           created_at?: string
@@ -248,6 +254,9 @@ export type Database = {
           id?: string
           property_id?: string
           user_id?: string
+          verification_result?: Json | null
+          verification_status?: string
+          verified_at?: string | null
         }
         Relationships: [
           {
