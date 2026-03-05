@@ -1,12 +1,40 @@
+import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { LogOut, Shield, User, Eye, Plus, Video } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { LogOut, Shield, User, Eye, Plus, Video, FileSearch, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import logo from "@/assets/chekamlogo.png";
 
+interface Property {
+  id: string;
+  title: string;
+  status: string;
+  submission_method: string;
+  created_at: string;
+}
+
 const Dashboard = () => {
   const { user, roles, signOut, hasRole } = useAuth();
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [loadingProps, setLoadingProps] = useState(true);
+
+  useEffect(() => {
+    const fetchProperties = async () => {
+      if (!user) return;
+      const { data } = await supabase
+        .from("properties")
+        .select("id, title, status, submission_method, created_at")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(10);
+      setProperties(data || []);
+      setLoadingProps(false);
+    };
+    fetchProperties();
+  }, [user]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -80,6 +108,41 @@ const Dashboard = () => {
               <Button size="sm" variant="outline" asChild><Link to="/inspections">Browse Inspections</Link></Button>
             </CardContent>
           </Card>
+        </div>
+
+        {/* My Properties */}
+        <div className="mb-8">
+          <h2 className="text-xl font-display font-semibold mb-4">My Properties</h2>
+          {loadingProps ? (
+            <div className="flex justify-center py-8"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>
+          ) : properties.length === 0 ? (
+            <Card><CardContent className="py-8 text-center text-muted-foreground">No properties submitted yet.</CardContent></Card>
+          ) : (
+            <div className="space-y-3">
+              {properties.map((p) => (
+                <Card key={p.id}>
+                  <CardContent className="flex items-center justify-between gap-4 py-4">
+                    <div className="min-w-0">
+                      <p className="font-medium truncate">{p.title}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {p.submission_method.replace("_", " ")} · {new Date(p.created_at).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <Badge variant="outline" className="capitalize">{p.status.replace("_", " ")}</Badge>
+                      {p.submission_method === "document_upload" && (
+                        <Button size="sm" variant="outline" className="gap-1" asChild>
+                          <Link to={`/property/${p.id}/documents`}>
+                            <FileSearch className="h-3.5 w-3.5" /> Verify Docs
+                          </Link>
+                        </Button>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
 
         <Card className="border-dashed border-2 border-primary/20 hover:border-primary/40 transition-colors">
