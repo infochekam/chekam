@@ -1,9 +1,12 @@
 import { motion } from "framer-motion";
 import { ArrowRight, Shield, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import heroBg from "@/assets/hero-bg.jpg";
 
 const HeroSection = () => {
+  const { session } = useAuth();
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden">
       {/* Background */}
@@ -54,8 +57,10 @@ const HeroSection = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.45 }}
           >
-            <Button variant="hero" size="lg" className="gap-2">
-              Submit a Property <ArrowRight size={18} />
+            <Button variant="hero" size="lg" className="gap-2" asChild>
+              <Link to={session ? "/submit-property" : "/auth"}>
+                Submit a Property <ArrowRight size={18} />
+              </Link>
             </Button>
             <Button variant="hero-outline" size="lg" className="gap-2">
               <Play size={16} /> Watch Demo
