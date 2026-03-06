@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { LogOut, Shield, User, Eye, Plus, Video, FileSearch, Loader2, MessageSquare } from "lucide-react";
+import { LogOut, Shield, User, Eye, Plus, Video, FileSearch, Loader2, MessageSquare, FileBarChart } from "lucide-react";
 import { Link } from "react-router-dom";
 import logo from "@/assets/chekamlogo.png";
 
@@ -148,6 +148,11 @@ const Dashboard = () => {
                           </Link>
                         </Button>
                       )}
+                      <Button size="sm" variant="outline" className="gap-1" asChild>
+                        <Link to={`/property/${p.id}/report`}>
+                          <FileBarChart className="h-3.5 w-3.5" /> Report
+                        </Link>
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
