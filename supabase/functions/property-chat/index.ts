@@ -33,11 +33,12 @@ serve(async (req) => {
     let propertyContext = "";
 
     if (property_id) {
-      // Fetch property details
+      // Fetch property details — scoped to the authenticated user
       const { data: property } = await supabase
         .from("properties")
         .select("*")
         .eq("id", property_id)
+        .eq("user_id", user.id)
         .single();
 
       if (property) {
