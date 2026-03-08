@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Bell, Check, CheckCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 import {
   Popover,
   PopoverContent,
@@ -25,6 +26,7 @@ interface Notification {
 const NotificationBell = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [open, setOpen] = useState(false);
 
@@ -172,6 +174,16 @@ const NotificationBell = () => {
             </div>
           )}
         </ScrollArea>
+        <div className="border-t border-border px-4 py-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="w-full text-xs text-muted-foreground hover:text-foreground"
+            onClick={() => { setOpen(false); navigate("/notifications"); }}
+          >
+            View all notifications
+          </Button>
+        </div>
       </PopoverContent>
     </Popover>
   );
