@@ -127,6 +127,7 @@ const PricingSection = () => {
               <Button
                 variant={plan.highlighted ? "hero" : "outline"}
                 className="w-full"
+                onClick={() => handleGetStarted()}
               >
                 {plan.name === "Enterprise" ? "Contact Sales" : "Get Started"}
               </Button>
