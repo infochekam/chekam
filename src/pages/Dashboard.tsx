@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { LogOut, Shield, User, Eye, Plus, Video, FileSearch, Loader2, MessageSquare, FileBarChart } from "lucide-react";
 import { Link } from "react-router-dom";
 import logo from "@/assets/chekamlogo.png";
+import NotificationBell from "@/components/NotificationBell";
 
 interface Property {
   id: string;
