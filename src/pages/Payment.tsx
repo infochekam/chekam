@@ -1,14 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, CheckCircle } from "lucide-react";
+import { ArrowLeft, CheckCircle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import PricingPlans, { PlanTier } from "@/components/payment/PricingPlans";
 import { usePaystack } from "@/hooks/usePaystack";
 import logo from "@/assets/chekamlogo.png";
-
-const PAYSTACK_PUBLIC_KEY = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY || "";
 
 const Payment = () => {
   const { user } = useAuth();
@@ -17,7 +16,14 @@ const Payment = () => {
   const propertyId = searchParams.get("propertyId") || undefined;
   const [selectedPlanId, setSelectedPlanId] = useState<string>();
   const [paymentComplete, setPaymentComplete] = useState(false);
+  const [paystackKey, setPaystackKey] = useState<string>("");
   const { loading, setLoading, initializePayment, verifyPayment } = usePaystack();
+
+  useEffect(() => {
+    supabase.functions.invoke("paystack-config").then(({ data }) => {
+      if (data?.publicKey) setPaystackKey(data.publicKey);
+    });
+  }, []);
 
   const handleSelectPlan = async (plan: PlanTier) => {
     if (!user?.email) {
