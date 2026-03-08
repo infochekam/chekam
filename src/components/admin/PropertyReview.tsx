@@ -55,14 +55,52 @@ const PropertyReview = () => {
     fetchProperties();
   }, [filter]);
 
+  const statusNotificationMap: Partial<Record<PropertyStatus, { title: string; message: (title: string) => string; type: string }>> = {
+    under_review: {
+      title: "Property Under Review",
+      message: (t) => `Your property "${t}" is now being reviewed by our team.`,
+      type: "status_under_review",
+    },
+    verified: {
+      title: "Property Verified",
+      message: (t) => `Great news! Your property "${t}" has been verified successfully.`,
+      type: "status_verified",
+    },
+    rejected: {
+      title: "Property Rejected",
+      message: (t) => `Your property "${t}" has been rejected. Please review and resubmit.`,
+      type: "status_rejected",
+    },
+  };
+
   const updateStatus = async (id: string, status: PropertyStatus) => {
+    // First get the property to know owner and title
+    const { data: prop } = await supabase
+      .from("properties")
+      .select("user_id, title")
+      .eq("id", id)
+      .single();
+
     const { error } = await supabase.from("properties").update({ status }).eq("id", id);
     if (error) {
       toast.error(error.message);
-    } else {
-      toast.success(`Property marked as "${status.replace("_", " ")}"`);
-      fetchProperties();
+      return;
     }
+
+    // Send in-app notification to property owner
+    const notif = statusNotificationMap[status];
+    if (notif && prop) {
+      await supabase.from("notifications").insert({
+        user_id: prop.user_id,
+        title: notif.title,
+        message: notif.message(prop.title),
+        type: notif.type,
+        property_id: id,
+      });
+    }
+
+    toast.success(`Property marked as "${status.replace("_", " ")}"`);
+    fetchProperties();
   };
 
   return (
