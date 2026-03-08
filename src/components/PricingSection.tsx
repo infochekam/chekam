@@ -1,6 +1,8 @@
 import { motion } from "framer-motion";
 import { Check } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 
 const plans = [
   {
@@ -50,6 +52,13 @@ const plans = [
 ];
 
 const PricingSection = () => {
+  const { session } = useAuth();
+  const navigate = useNavigate();
+
+  const handleGetStarted = () => {
+    navigate(session ? "/payment" : "/auth");
+  };
+
   return (
     <section id="pricing" className="py-24 bg-muted">
       <div className="container mx-auto px-4">
@@ -118,6 +127,7 @@ const PricingSection = () => {
               <Button
                 variant={plan.highlighted ? "hero" : "outline"}
                 className="w-full"
+                onClick={() => handleGetStarted()}
               >
                 {plan.name === "Enterprise" ? "Contact Sales" : "Get Started"}
               </Button>
