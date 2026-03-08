@@ -1,8 +1,10 @@
 import { motion } from "framer-motion";
 import { ArrowRight, Globe, Shield, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 const CTASection = () => {
+  const navigate = useNavigate();
   return (
     <section id="contact" className="py-24 bg-background">
       <div className="container mx-auto px-4">
@@ -26,7 +28,7 @@ const CTASection = () => {
               AI-powered verification, virtual inspections, and smart decision-making.
             </p>
 
-            <Button variant="hero" size="lg" className="gap-2">
+            <Button variant="hero" size="lg" className="gap-2" onClick={() => navigate("/auth")}>
               Get Started Free <ArrowRight size={18} />
             </Button>
 
