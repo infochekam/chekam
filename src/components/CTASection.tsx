@@ -28,7 +28,7 @@ const CTASection = () => {
               AI-powered verification, virtual inspections, and smart decision-making.
             </p>
 
-            <Button variant="hero" size="lg" className="gap-2">
+            <Button variant="hero" size="lg" className="gap-2" onClick={() => navigate("/auth")}>
               Get Started Free <ArrowRight size={18} />
             </Button>
 

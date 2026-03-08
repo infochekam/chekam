@@ -47,10 +47,10 @@ const Footer = () => {
             </h4>
             <ul className="space-y-3 text-sm opacity-70">
               <li className="flex items-center gap-2">
-                <Mail size={14} /> hello@chekam.com
+                <Mail size={14} /> info@chekam.com
               </li>
               <li className="flex items-center gap-2">
-                <Phone size={14} /> +234 800 000 0000
+                <Phone size={14} /> 09038315695
               </li>
               <li className="flex items-center gap-2">
                 <MapPin size={14} /> Lagos, Nigeria
