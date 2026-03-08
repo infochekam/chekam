@@ -238,6 +238,10 @@ const Notifications = () => {
             ))}
           </div>
         )}
+
+        <div className="mt-8">
+          <NotificationPreferences />
+        </div>
       </main>
     </div>
   );
