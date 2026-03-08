@@ -43,7 +43,7 @@ const PropertyReview = () => {
       .order("created_at", { ascending: false });
 
     if (filter !== "all") {
-      query = query.eq("status", filter);
+      query = query.eq("status", filter as PropertyStatus);
     }
 
     const { data } = await query;
