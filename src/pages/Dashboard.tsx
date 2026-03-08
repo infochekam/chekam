@@ -44,11 +44,13 @@ const Dashboard = () => {
           <a href="/" className="flex items-center gap-2">
             <img src={logo} alt="Chekam" className="h-8" />
           </a>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <NotificationBell />
             <span className="text-sm text-muted-foreground hidden sm:inline">{user?.email}</span>
             <Button variant="ghost" size="sm" onClick={signOut}>
               <LogOut className="h-4 w-4 mr-1" /> Sign Out
             </Button>
+          </div>
           </div>
         </div>
       </header>
