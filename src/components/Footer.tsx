@@ -1,5 +1,5 @@
 import logo from "@/assets/chekamlogo.png";
-import { Mail, MapPin, Phone } from "lucide-react";
+import { Mail, MapPin, Phone, Twitter, Instagram, Linkedin } from "lucide-react";
 
 const Footer = () => {
   return (
