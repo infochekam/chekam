@@ -18,6 +18,7 @@ import PropertyChat from "./pages/PropertyChat";
 import PropertyReport from "./pages/PropertyReport";
 import Profile from "./pages/Profile";
 import Payment from "./pages/Payment";
+import Notifications from "./pages/Notifications";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
