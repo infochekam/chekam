@@ -43,7 +43,7 @@ const Payment = () => {
       planType: plan.id,
       propertyId,
       userId: user.id,
-      publicKey: PAYSTACK_PUBLIC_KEY,
+      publicKey: paystackKey,
       onSuccess: async (reference) => {
         try {
           await verifyPayment(reference);
