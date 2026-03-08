@@ -246,6 +246,51 @@ const Profile = () => {
           </CardContent>
         </Card>
 
+        {/* Payment History */}
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Receipt className="h-5 w-5 text-primary" />
+              Payment History
+            </CardTitle>
+            <CardDescription>Your past transactions and their statuses.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {paymentsLoading ? (
+              <div className="flex justify-center py-6">
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              </div>
+            ) : payments.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-6">No payments yet.</p>
+            ) : (
+              <div className="space-y-3">
+                {payments.map((p) => (
+                  <div key={p.id} className="flex items-center justify-between gap-4 rounded-lg border border-border p-3">
+                    <div className="min-w-0">
+                      <p className="font-medium text-sm capitalize">{p.plan_type} Plan</p>
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(p.created_at).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}
+                        {" · "}Ref: {p.paystack_reference}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-3 shrink-0">
+                      <span className="font-semibold text-sm">
+                        ₦{p.amount.toLocaleString()}
+                      </span>
+                      <Badge
+                        variant={p.status === "success" ? "default" : p.status === "pending" ? "secondary" : "destructive"}
+                        className="capitalize"
+                      >
+                        {p.status}
+                      </Badge>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
         {/* Account Info */}
         <Card>
           <CardHeader>
