@@ -30,7 +30,7 @@ const Payment = () => {
       toast.error("Please log in to continue");
       return;
     }
-    if (!PAYSTACK_PUBLIC_KEY) {
+    if (!paystackKey) {
       toast.error("Payment is not configured. Please contact support.");
       return;
     }
