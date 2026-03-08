@@ -58,9 +58,11 @@ const Admin = () => {
   };
 
   useEffect(() => {
-    fetchUsers();
-    fetchPropertyStats();
-  }, []);
+    if (hasRole("admin")) {
+      fetchUsers();
+      fetchPropertyStats();
+    }
+  }, [hasRole]);
 
   if (!hasRole("admin")) {
     return (
