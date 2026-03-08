@@ -17,6 +17,7 @@ import PropertyDocuments from "./pages/PropertyDocuments";
 import PropertyChat from "./pages/PropertyChat";
 import PropertyReport from "./pages/PropertyReport";
 import Profile from "./pages/Profile";
+import Payment from "./pages/Payment";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -40,6 +41,7 @@ const App = () => (
             <Route path="/property/:propertyId/documents" element={<ProtectedRoute><PropertyDocuments /></ProtectedRoute>} />
             <Route path="/assistant" element={<ProtectedRoute><PropertyChat /></ProtectedRoute>} />
             <Route path="/property/:propertyId/report" element={<ProtectedRoute><PropertyReport /></ProtectedRoute>} />
+            <Route path="/payment" element={<ProtectedRoute><Payment /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
