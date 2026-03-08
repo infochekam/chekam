@@ -16,6 +16,7 @@ import Inspection from "./pages/Inspection";
 import PropertyDocuments from "./pages/PropertyDocuments";
 import PropertyChat from "./pages/PropertyChat";
 import PropertyReport from "./pages/PropertyReport";
+import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
