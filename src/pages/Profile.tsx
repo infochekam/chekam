@@ -49,7 +49,7 @@ const Profile = () => {
 
   useEffect(() => {
     if (!user) return;
-    const fetch = async () => {
+    const fetchProfile = async () => {
       const { data } = await supabase
         .from("profiles")
         .select("first_name, last_name, phone, avatar_url")
@@ -65,7 +65,18 @@ const Profile = () => {
       }
       setLoading(false);
     };
-    fetch();
+    const fetchPayments = async () => {
+      const { data } = await supabase
+        .from("payments")
+        .select("id, plan_type, amount, currency, status, created_at, paid_at, paystack_reference")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(20);
+      setPayments(data || []);
+      setPaymentsLoading(false);
+    };
+    fetchProfile();
+    fetchPayments();
   }, [user]);
 
   const handleSave = async () => {
