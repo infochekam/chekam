@@ -21,12 +21,25 @@ interface ProfileData {
   avatar_url: string;
 }
 
+interface Payment {
+  id: string;
+  plan_type: string;
+  amount: number;
+  currency: string;
+  status: string;
+  created_at: string;
+  paid_at: string | null;
+  paystack_reference: string;
+}
+
 const Profile = () => {
   const { user, signOut } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [payments, setPayments] = useState<Payment[]>([]);
+  const [paymentsLoading, setPaymentsLoading] = useState(true);
   const [profile, setProfile] = useState<ProfileData>({
     first_name: "",
     last_name: "",
