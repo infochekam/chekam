@@ -78,6 +78,15 @@ serve(async (req) => {
         .eq("id", payment.property_id);
     }
 
+    // Create in-app notification
+    await supabase.from("notifications").insert({
+      user_id: user.id,
+      title: "Payment Successful",
+      message: `Your ${payment?.plan_type || "basic"} plan payment was completed successfully. Your property is now submitted for review.`,
+      type: "payment_success",
+      property_id: payment?.property_id || null,
+    });
+
     return new Response(JSON.stringify({ success: true, plan: payment?.plan_type }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
