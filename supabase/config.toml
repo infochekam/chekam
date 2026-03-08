@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.property-chat]
 verify_jwt = false
+
+[functions.paystack-verify]
+verify_jwt = false
