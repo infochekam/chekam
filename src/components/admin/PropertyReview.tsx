@@ -33,7 +33,7 @@ const STATUS_COLORS: Record<PropertyStatus, "default" | "secondary" | "outline" 
 const PropertyReview = () => {
   const [properties, setProperties] = useState<PropertyRow[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<string>("all");
+  const [filter, setFilter] = useState("all");
 
   const fetchProperties = async () => {
     setLoading(true);
