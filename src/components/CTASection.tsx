@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { ArrowRight, Globe, Shield, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 const CTASection = () => {
   return (
