@@ -52,6 +52,13 @@ const plans = [
 ];
 
 const PricingSection = () => {
+  const { session } = useAuth();
+  const navigate = useNavigate();
+
+  const handleGetStarted = () => {
+    navigate(session ? "/payment" : "/auth");
+  };
+
   return (
     <section id="pricing" className="py-24 bg-muted">
       <div className="container mx-auto px-4">
