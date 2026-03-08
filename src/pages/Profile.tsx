@@ -6,8 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, Camera, Loader2, Save, User } from "lucide-react";
+import { ArrowLeft, Camera, Loader2, Save, User, Receipt } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import logo from "@/assets/chekamlogo.png";
@@ -20,12 +21,25 @@ interface ProfileData {
   avatar_url: string;
 }
 
+interface Payment {
+  id: string;
+  plan_type: string;
+  amount: number;
+  currency: string;
+  status: string;
+  created_at: string;
+  paid_at: string | null;
+  paystack_reference: string;
+}
+
 const Profile = () => {
   const { user, signOut } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [payments, setPayments] = useState<Payment[]>([]);
+  const [paymentsLoading, setPaymentsLoading] = useState(true);
   const [profile, setProfile] = useState<ProfileData>({
     first_name: "",
     last_name: "",
@@ -35,7 +49,7 @@ const Profile = () => {
 
   useEffect(() => {
     if (!user) return;
-    const fetch = async () => {
+    const fetchProfile = async () => {
       const { data } = await supabase
         .from("profiles")
         .select("first_name, last_name, phone, avatar_url")
@@ -51,7 +65,18 @@ const Profile = () => {
       }
       setLoading(false);
     };
-    fetch();
+    const fetchPayments = async () => {
+      const { data } = await supabase
+        .from("payments")
+        .select("id, plan_type, amount, currency, status, created_at, paid_at, paystack_reference")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(20);
+      setPayments(data || []);
+      setPaymentsLoading(false);
+    };
+    fetchProfile();
+    fetchPayments();
   }, [user]);
 
   const handleSave = async () => {
@@ -218,6 +243,51 @@ const Profile = () => {
                 Save Changes
               </Button>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Payment History */}
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Receipt className="h-5 w-5 text-primary" />
+              Payment History
+            </CardTitle>
+            <CardDescription>Your past transactions and their statuses.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {paymentsLoading ? (
+              <div className="flex justify-center py-6">
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              </div>
+            ) : payments.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-6">No payments yet.</p>
+            ) : (
+              <div className="space-y-3">
+                {payments.map((p) => (
+                  <div key={p.id} className="flex items-center justify-between gap-4 rounded-lg border border-border p-3">
+                    <div className="min-w-0">
+                      <p className="font-medium text-sm capitalize">{p.plan_type} Plan</p>
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(p.created_at).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}
+                        {" · "}Ref: {p.paystack_reference}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-3 shrink-0">
+                      <span className="font-semibold text-sm">
+                        ₦{p.amount.toLocaleString()}
+                      </span>
+                      <Badge
+                        variant={p.status === "success" ? "default" : p.status === "pending" ? "secondary" : "destructive"}
+                        className="capitalize"
+                      >
+                        {p.status}
+                      </Badge>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
 
