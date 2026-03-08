@@ -87,16 +87,26 @@ const PropertyReview = () => {
       return;
     }
 
-    // Send in-app notification to property owner
+    // Send in-app notification to property owner (if preference enabled)
     const notif = statusNotificationMap[status];
     if (notif && prop) {
-      await supabase.from("notifications").insert({
-        user_id: prop.user_id,
-        title: notif.title,
-        message: notif.message(prop.title),
-        type: notif.type,
-        property_id: id,
-      });
+      const prefKey = notif.type; // e.g. "status_under_review"
+      const { data: prefs } = await supabase
+        .from("notification_preferences")
+        .select(prefKey)
+        .eq("user_id", prop.user_id)
+        .single();
+
+      // Send if no prefs row exists (default) or if preference is enabled
+      if (!prefs || (prefs as Record<string, boolean>)[prefKey] !== false) {
+        await supabase.from("notifications").insert({
+          user_id: prop.user_id,
+          title: notif.title,
+          message: notif.message(prop.title),
+          type: notif.type,
+          property_id: id,
+        });
+      }
     }
 
     toast.success(`Property marked as "${status.replace("_", " ")}"`);
