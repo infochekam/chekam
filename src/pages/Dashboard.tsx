@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { LogOut, Shield, User, Eye, Plus, Video, FileSearch, Loader2, MessageSquare, FileBarChart } from "lucide-react";
+import { LogOut, Shield, User, Eye, Plus, Video, FileSearch, Loader2, MessageSquare, FileBarChart, BadgeCheck } from "lucide-react";
 import { Link } from "react-router-dom";
 import logo from "@/assets/chekamlogo.png";
 import NotificationBell from "@/components/NotificationBell";
@@ -146,6 +146,13 @@ const Dashboard = () => {
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
                       <Badge variant="outline" className="capitalize">{p.status.replace("_", " ")}</Badge>
+                      {p.status === "draft" && (
+                        <Button size="sm" className="gap-1" asChild>
+                          <Link to={`/payment?propertyId=${p.id}`}>
+                            <BadgeCheck className="h-3.5 w-3.5" /> Verify Property
+                          </Link>
+                        </Button>
+                      )}
                       {p.submission_method === "document_upload" && (
                         <Button size="sm" variant="outline" className="gap-1" asChild>
                           <Link to={`/property/${p.id}/documents`}>
