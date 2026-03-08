@@ -93,12 +93,12 @@ const PropertyReview = () => {
       const prefKey = notif.type; // e.g. "status_under_review"
       const { data: prefs } = await supabase
         .from("notification_preferences")
-        .select(prefKey)
+        .select("status_under_review, status_verified, status_rejected")
         .eq("user_id", prop.user_id)
         .single();
 
-      // Send if no prefs row exists (default) or if preference is enabled
-      if (!prefs || (prefs as Record<string, boolean>)[prefKey] !== false) {
+      const prefsObj = prefs as Record<string, boolean> | null;
+      if (!prefsObj || prefsObj[prefKey] !== false) {
         await supabase.from("notifications").insert({
           user_id: prop.user_id,
           title: notif.title,
