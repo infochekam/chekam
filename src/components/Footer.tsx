@@ -1,5 +1,5 @@
 import logo from "@/assets/chekamlogo.png";
-import { Mail, MapPin, Phone } from "lucide-react";
+import { Mail, MapPin, Phone, Twitter, Instagram, Linkedin } from "lucide-react";
 
 const Footer = () => {
   return (
@@ -12,6 +12,17 @@ const Footer = () => {
             <p className="text-sm opacity-70">
               AI-powered property verification for secure, remote real estate decisions.
             </p>
+            <div className="flex items-center gap-3 pt-2">
+              <a href="https://twitter.com/chekam" target="_blank" rel="noopener noreferrer" className="opacity-50 hover:opacity-100 transition-opacity">
+                <Twitter size={18} />
+              </a>
+              <a href="https://instagram.com/chekam" target="_blank" rel="noopener noreferrer" className="opacity-50 hover:opacity-100 transition-opacity">
+                <Instagram size={18} />
+              </a>
+              <a href="https://linkedin.com/company/chekam" target="_blank" rel="noopener noreferrer" className="opacity-50 hover:opacity-100 transition-opacity">
+                <Linkedin size={18} />
+              </a>
+            </div>
           </div>
 
           {/* Product */}
