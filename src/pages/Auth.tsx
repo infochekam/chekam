@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
+import { auth } from "@/integrations/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -48,8 +48,9 @@ const Auth = () => {
         if (error) throw error;
         toast.success("Check your email to confirm your account!");
       } else if (mode === "login") {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
+        const result = await supabase.auth.signInWithPassword({ email, password });
+        console.debug("supabase signInWithPassword result:", result);
+        if (result.error) throw result.error;
       } else {
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
           redirectTo: `${window.location.origin}/reset-password`,
@@ -65,7 +66,7 @@ const Auth = () => {
   };
 
   const handleGoogleSignIn = async () => {
-    const result = await lovable.auth.signInWithOAuth("google", {
+    const result = await auth.signInWithOAuth("google", {
       redirect_uri: window.location.origin,
     });
     if (result?.error) {

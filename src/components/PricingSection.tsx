@@ -3,53 +3,7 @@ import { Check } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-
-const plans = [
-  {
-    name: "Pay-Per-Case",
-    price: "$29",
-    period: "per case",
-    description: "Perfect for one-off property checks",
-    features: [
-      "Single property verification",
-      "Document analysis & OCR",
-      "Video walkthrough",
-      "AI risk scoring & report",
-      "Email support",
-    ],
-    highlighted: false,
-  },
-  {
-    name: "Professional",
-    price: "$99",
-    period: "per month",
-    description: "For active buyers and investors",
-    features: [
-      "Unlimited verifications",
-      "AI Decision Assistant",
-      "Video + 3D virtual tours",
-      "AI-powered scoring",
-      "Priority support",
-      "Advanced fraud detection",
-    ],
-    highlighted: true,
-  },
-  {
-    name: "Enterprise",
-    price: "Custom",
-    period: "",
-    description: "For agencies and legal teams",
-    features: [
-      "Everything in Professional",
-      "Team collaboration",
-      "API access",
-      "Custom integrations",
-      "Dedicated account manager",
-      "SLA guarantee",
-    ],
-    highlighted: false,
-  },
-];
+import { PRICING_PLANS } from "@/lib/pricing";
 
 const PricingSection = () => {
   const { session } = useAuth();
@@ -75,7 +29,7 @@ const PricingSection = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-          {plans.map((plan, i) => (
+          {PRICING_PLANS.map((plan, i) => (
             <motion.div
               key={plan.name}
               initial={{ opacity: 0, y: 30 }}
@@ -98,7 +52,9 @@ const PricingSection = () => {
               </p>
 
               <div className="mt-6 mb-6">
-                <span className="text-4xl font-display font-bold">{plan.price}</span>
+                <span className="text-4xl font-display font-bold">
+                  {plan.price === 0 ? "Custom" : `$${plan.price}`}
+                </span>
                 {plan.period && (
                   <span
                     className={`text-sm ml-1 ${

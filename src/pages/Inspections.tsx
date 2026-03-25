@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Plus, Video, Loader2 } from "lucide-react";
+import { ArrowLeft, Plus, Video, Loader2, Clock, CheckCircle2, Eye, MapPin } from "lucide-react";
 import { toast } from "sonner";
 import logo from "@/assets/chekamlogo.png";
 
@@ -16,8 +16,9 @@ interface InspectionRow {
   property_id: string;
   status: string;
   overall_score: number | null;
+  inspector_id?: string;
   created_at: string;
-  properties: { title: string } | null;
+  properties: { title: string; address?: string; city?: string } | null;
 }
 
 interface PropertyOption {
@@ -34,26 +35,40 @@ const Inspections = () => {
   const [selectedProperty, setSelectedProperty] = useState("");
 
   const isAdmin = hasRole("admin");
+  const isInspector = hasRole("inspector");
 
   const fetchData = async () => {
     setLoading(true);
-    const { data: insps } = await supabase
-      .from("inspections")
-      .select("id, property_id, status, overall_score, created_at, properties(title)")
-      .order("created_at", { ascending: false });
-
-    setInspections((insps as unknown as InspectionRow[]) || []);
-
-    // Fetch properties for creating new inspections
-    if (isAdmin) {
-      const { data: props } = await supabase
-        .from("properties")
-        .select("id, title")
-        .eq("status", "submitted")
+    try {
+      // Admins see all inspections, inspectors see only assigned ones
+      let query = supabase
+        .from("inspections")
+        .select("id, property_id, status, overall_score, inspector_id, created_at, properties(title, address, city)")
         .order("created_at", { ascending: false });
-      setProperties((props as PropertyOption[]) || []);
+
+      if (isInspector && !isAdmin) {
+        query = query.eq("inspector_id", user?.id);
+      }
+
+      const { data: insps, error } = await query;
+
+      if (error) throw error;
+      setInspections((insps || []) as unknown as InspectionRow[]);
+
+      // Fetch unassigned properties for admins to create inspections
+      if (isAdmin) {
+        const { data: props } = await supabase
+          .from("properties")
+          .select("id, title")
+          .eq("status", "submitted")
+          .order("created_at", { ascending: false });
+        setProperties((props as PropertyOption[]) || []);
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Failed to fetch inspections");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   useEffect(() => {

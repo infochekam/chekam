@@ -33,8 +33,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
+    let mounted = true;
+
+    // Always subscribe to Supabase auth state changes so client-side sign-ins are detected.
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
+        if (!mounted) return;
         setSession(session);
         setUser(session?.user ?? null);
         if (session?.user) {
@@ -47,20 +51,55 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     );
 
+    // Seed initial supabase client session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!mounted) return;
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
         fetchRoles(session.user.id);
       }
       setLoading(false);
+    }).catch(() => {
+      setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    // Also check server-side session (e.g., OAuth via auth server). If present, prefer it.
+    fetch(`${import.meta.env.VITE_AUTH_SERVER_ORIGIN || "http://localhost:3000"}/auth/me`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((data) => {
+        if (!mounted) return;
+        if (data?.user) {
+          // server session exists; set user from server (this doesn't populate supabase client session)
+          setSession(null);
+          setUser(data.user as any);
+          // fetch roles for server session user as well
+          fetchRoles(data.user.id);
+          setLoading(false);
+        }
+      })
+      .catch(() => {
+        // ignore
+      });
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    try {
+      await fetch(`${import.meta.env.VITE_AUTH_SERVER_ORIGIN || "http://localhost:3000"}/auth/logout`, {
+        method: "POST",
+        credentials: "include",
+      });
+    } catch (e) {
+      // ignore
+    }
+    try {
+      await supabase.auth.signOut();
+    } catch (e) {}
     setRoles([]);
   };
 

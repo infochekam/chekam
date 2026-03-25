@@ -11,6 +11,16 @@ export default defineConfig(({ mode }) => ({
     hmr: {
       overlay: false,
     },
+    // Proxy OAuth-initiate requests to the Lovable auth host during local development.
+    // Configure the target in a .env file with VITE_LOVABLE_AUTH_URL, e.g.
+    // VITE_LOVABLE_AUTH_URL="https://auth.lovable.dev"
+    proxy: {
+      '/~oauth': {
+        target: process.env.VITE_LOVABLE_AUTH_URL || 'https://auth.lovable.dev',
+        changeOrigin: true,
+        secure: false,
+      },
+    },
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
   resolve: {

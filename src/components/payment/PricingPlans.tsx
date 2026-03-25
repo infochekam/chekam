@@ -2,57 +2,9 @@ import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { PAYMENT_PLAN_TIERS, PricingPlan } from "@/lib/pricing";
 
-export interface PlanTier {
-  id: string;
-  name: string;
-  price: number;
-  description: string;
-  features: string[];
-  popular?: boolean;
-}
-
-export const PLAN_TIERS: PlanTier[] = [
-  {
-    id: "basic",
-    name: "Basic",
-    price: 5000,
-    description: "Essential document verification",
-    features: [
-      "AI document verification",
-      "OCR text extraction",
-      "Authenticity assessment",
-      "PDF report",
-    ],
-  },
-  {
-    id: "standard",
-    name: "Standard",
-    price: 15000,
-    description: "Comprehensive property check",
-    features: [
-      "Everything in Basic",
-      "Virtual property inspection",
-      "AI risk scoring",
-      "Neighbourhood analysis",
-      "Priority support",
-    ],
-    popular: true,
-  },
-  {
-    id: "premium",
-    name: "Premium",
-    price: 35000,
-    description: "Full due-diligence package",
-    features: [
-      "Everything in Standard",
-      "Physical inspection coordination",
-      "Legal document review",
-      "Market valuation report",
-      "Dedicated account manager",
-    ],
-  },
-];
+export interface PlanTier extends PricingPlan {}
 
 interface PricingPlansProps {
   onSelectPlan: (plan: PlanTier) => void;
@@ -63,7 +15,7 @@ interface PricingPlansProps {
 const PricingPlans = ({ onSelectPlan, loading, selectedPlanId }: PricingPlansProps) => {
   return (
     <div className="grid gap-6 md:grid-cols-3">
-      {PLAN_TIERS.map((plan) => (
+      {PAYMENT_PLAN_TIERS.map((plan) => (
         <Card
           key={plan.id}
           className={`relative flex flex-col ${
@@ -79,8 +31,12 @@ const PricingPlans = ({ onSelectPlan, loading, selectedPlanId }: PricingPlansPro
             <CardTitle className="text-lg">{plan.name}</CardTitle>
             <p className="text-sm text-muted-foreground">{plan.description}</p>
             <div className="mt-3">
-              <span className="text-3xl font-bold">₦{plan.price.toLocaleString()}</span>
-              <span className="text-muted-foreground text-sm"> / property</span>
+              <span className="text-3xl font-bold">
+                {plan.price === 0 ? "Custom" : `₦${plan.price.toLocaleString()}`}
+              </span>
+              {plan.period && (
+                <span className="text-muted-foreground text-sm"> / {plan.period}</span>
+              )}
             </div>
           </CardHeader>
           <CardContent className="flex-1 flex flex-col">

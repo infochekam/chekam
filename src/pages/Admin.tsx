@@ -10,6 +10,8 @@ import type { Database } from "@/integrations/supabase/types";
 import AdminStats from "@/components/admin/AdminStats";
 import UserManagement from "@/components/admin/UserManagement";
 import PropertyReview from "@/components/admin/PropertyReview";
+import InspectionManagement from "@/components/admin/InspectionManagement";
+import DocumentVerification from "@/components/admin/DocumentVerification";
 
 type AppRole = Database["public"]["Enums"]["app_role"];
 
@@ -106,10 +108,18 @@ const Admin = () => {
         <Tabs defaultValue="users" className="space-y-4">
           <TabsList>
             <TabsTrigger value="users">Users</TabsTrigger>
+            <TabsTrigger value="inspections">Inspections</TabsTrigger>
+            <TabsTrigger value="documents">Documents</TabsTrigger>
             <TabsTrigger value="properties">Property Review</TabsTrigger>
           </TabsList>
           <TabsContent value="users">
             <UserManagement users={users} loading={loading} onRefresh={fetchUsers} />
+          </TabsContent>
+          <TabsContent value="inspections">
+            <InspectionManagement />
+          </TabsContent>
+          <TabsContent value="documents">
+            <DocumentVerification />
           </TabsContent>
           <TabsContent value="properties">
             <PropertyReview />

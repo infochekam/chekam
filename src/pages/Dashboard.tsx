@@ -15,6 +15,13 @@ interface Property {
   status: string;
   submission_method: string;
   created_at: string;
+  inspection?: {
+    id: string;
+    status: "pending" | "in_progress" | "completed" | "scored";
+    inspector_id?: string;
+    overall_score?: number;
+    updated_at: string;
+  };
 }
 
 const Dashboard = () => {
@@ -31,7 +38,26 @@ const Dashboard = () => {
         .eq("user_id", user.id)
         .order("created_at", { ascending: false })
         .limit(10);
-      setProperties(data || []);
+      
+      if (!data) {
+        setProperties([]);
+        setLoadingProps(false);
+        return;
+      }
+
+      // Fetch inspection data for each property
+      const propsWithInspections = await Promise.all(
+        data.map(async (prop) => {
+          const { data: inspection } = await supabase
+            .from("inspections")
+            .select("id, status, inspector_id, overall_score, updated_at")
+            .eq("property_id", prop.id)
+            .single();
+          return { ...prop, inspection: inspection || undefined };
+        })
+      );
+
+      setProperties(propsWithInspections);
       setLoadingProps(false);
     };
     fetchProperties();
@@ -137,15 +163,50 @@ const Dashboard = () => {
             <div className="space-y-3">
               {properties.map((p) => (
                 <Card key={p.id}>
-                  <CardContent className="flex items-center justify-between gap-4 py-4">
-                    <div className="min-w-0">
+                  <CardContent className="py-4 space-y-3">
+                    {/* Property Title and Info */}
+                    <div>
                       <p className="font-medium truncate">{p.title}</p>
                       <p className="text-xs text-muted-foreground mt-0.5">
-                        {p.submission_method.replace("_", " ")} · {new Date(p.created_at).toLocaleDateString()}
+                        {p.submission_method.replace(/_/g, " ")} · {new Date(p.created_at).toLocaleDateString()}
                       </p>
                     </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                      <Badge variant="outline" className="capitalize">{p.status.replace("_", " ")}</Badge>
+
+                    {/* Inspection Status Timeline */}
+                    {p.inspection && (
+                      <div className="pt-2 border-t border-border">
+                        <p className="text-xs font-medium text-muted-foreground mb-2">Inspection Progress</p>
+                        <div className="flex items-center gap-1">
+                          {["pending", "in_progress", "completed", "scored"].map((status, idx) => (
+                            <div key={status} className="flex items-center flex-1">
+                              <div
+                                className={`h-2 flex-1 rounded-full transition-colors ${
+                                  ["pending", "in_progress", "completed", "scored"].indexOf(p.inspection!.status) >= idx
+                                    ? "bg-primary"
+                                    : "bg-muted"
+                                }`}
+                              />
+                              {idx < 3 && <div className="w-1 h-1" />}
+                            </div>
+                          ))}
+                        </div>
+                        <div className="flex justify-between mt-2 text-xs text-muted-foreground">
+                          <span className="capitalize">{p.inspection.status.replace(/_/g, " ")}</span>
+                          {p.inspection.overall_score !== null && p.inspection.overall_score !== undefined && (
+                            <span className="font-medium text-primary">Score: {p.inspection.overall_score}/10</span>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Action Buttons */}
+                    <div className="flex items-center gap-2 flex-wrap pt-2 border-t border-border">
+                      <Badge variant="outline" className="capitalize">{p.status.replace(/_/g, " ")}</Badge>
+                      <Button size="sm" className="gap-1" asChild>
+                        <Link to={`/property/${p.id}`}>
+                          <Eye className="h-3.5 w-3.5" /> View Details
+                        </Link>
+                      </Button>
                       {p.status === "draft" && (
                         <Button size="sm" className="gap-1" asChild>
                           <Link to={`/payment?propertyId=${p.id}`}>

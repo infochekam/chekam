@@ -13,6 +13,7 @@ import Admin from "./pages/Admin";
 import SubmitProperty from "./pages/SubmitProperty";
 import Inspections from "./pages/Inspections";
 import Inspection from "./pages/Inspection";
+import PropertyDetails from "./pages/PropertyDetails";
 import PropertyDocuments from "./pages/PropertyDocuments";
 import PropertyChat from "./pages/PropertyChat";
 import PropertyReport from "./pages/PropertyReport";
@@ -37,6 +38,7 @@ const App = () => (
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
             <Route path="/submit-property" element={<ProtectedRoute><SubmitProperty /></ProtectedRoute>} />
+            <Route path="/property/:propertyId" element={<ProtectedRoute><PropertyDetails /></ProtectedRoute>} />
             <Route path="/inspections" element={<ProtectedRoute><Inspections /></ProtectedRoute>} />
             <Route path="/inspection/:id" element={<ProtectedRoute><Inspection /></ProtectedRoute>} />
             <Route path="/property/:propertyId/documents" element={<ProtectedRoute><PropertyDocuments /></ProtectedRoute>} />

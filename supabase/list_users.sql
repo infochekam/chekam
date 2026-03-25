@@ -1,0 +1,1 @@
+SELECT id, email, raw_user_meta_data FROM auth.users LIMIT 10;
