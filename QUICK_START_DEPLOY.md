@@ -32,13 +32,13 @@ git push origin main
 Copy these into Render dashboard (Settings → Environment):
 
 ```
-SUPABASE_URL=https://anyaaafpqpfkivmghhxm.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=paste-your-key
-GOOGLE_CLIENT_ID=paste-your-id
-GOOGLE_CLIENT_SECRET=paste-your-secret
-SESSION_SECRET=any-random-string-here
-PAYSTACK_PUBLIC_KEY=pk_live_3edf5145dc961ec4b761a4b94c25490ed04dd4f6
-PAYSTACK_SECRET_KEY=sk_live_07eb93b3094c978c5126ece9f39a1629053b64ce
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key-here
+GOOGLE_CLIENT_ID=your-google-client-id-here
+GOOGLE_CLIENT_SECRET=your-google-client-secret-here
+SESSION_SECRET=your-random-string-here
+PAYSTACK_PUBLIC_KEY=pk_live_your-public-key-here
+PAYSTACK_SECRET_KEY=sk_live_your-secret-key-here
 FRONTEND_ORIGIN=https://chekam.onrender.com
 AUTH_SERVER_ORIGIN=https://chekam.onrender.com
 ```
