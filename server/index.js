@@ -4,8 +4,13 @@ import { createClient } from "@supabase/supabase-js";
 import jwt from "jsonwebtoken";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import path from "path";
+import { fileURLToPath } from "url";
 
 dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -21,7 +26,25 @@ const supabaseAdmin = SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY ? createClient(S
 
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors({ origin: FRONTEND_ORIGIN, credentials: true }));
+
+// CORS configuration - allow both local dev and production frontend
+const corsOptions = {
+  origin: function (origin, callback) {
+    const allowedOrigins = [FRONTEND_ORIGIN, "http://localhost:8080", "http://localhost:8081", "http://localhost:8082"];
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
+};
+app.use(cors(corsOptions));
+
+// Serve static frontend files in production
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static(path.join(__dirname, "../public")));
+}
 
 app.get("/", (req, res) => {
   res.send("Chekam Auth Server");
@@ -147,6 +170,13 @@ app.post("/auth/logout", (req, res) => {
   res.clearCookie("chekam_session");
   res.json({ ok: true });
 });
+
+// SPA fallback - serve index.html for all unmatched routes (in production)
+if (process.env.NODE_ENV === "production") {
+  app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname, "../public/index.html"));
+  });
+}
 
 app.listen(PORT, () => {
   console.log(`Auth server running on ${AUTH_ORIGIN}`);

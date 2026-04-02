@@ -1,0 +1,44 @@
+services:
+  - type: web
+    name: chekam
+    runtime: docker
+    
+    # Build configuration
+    dockerfilePath: ./Dockerfile
+    
+    # Environment variables
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: SESSION_SECRET
+        sync: false
+      - key: PAYSTACK_PUBLIC_KEY
+        sync: false
+      - key: PAYSTACK_SECRET_KEY
+        sync: false
+      - key: FRONTEND_ORIGIN
+        value: https://chekam.onrender.com
+      - key: AUTH_SERVER_ORIGIN
+        value: https://chekam.onrender.com
+    
+    # Resource
+    plan: free
+    
+    # Build command (not needed with Dockerfile)
+    # Web service auto-detects port from Dockerfile EXPOSE
+    
+    # Health check
+    healthCheckPath: /
+    
+    # Auto-deploy on git push
+    autoDeploy: true
