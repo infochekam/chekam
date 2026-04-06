@@ -192,12 +192,19 @@ app.post("/auth/logout", (req, res) => {
 });
 
 // SPA fallback - serve index.html for all unmatched routes
+// SPA fallback - only for non-static routes
 app.get("*", (req, res) => {
+  // Don't serve index.html for static assets or API calls
+  const staticExtensions = /\.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot|map)$/i;
+  if (staticExtensions.test(req.path) || req.path.startsWith("/api") || req.path.startsWith("/auth")) {
+    return res.status(404).json({ error: "Not found" });
+  }
+
   const indexPath = path.join(publicPath, "index.html");
-  console.log(`[Server] Serving SPA fallback for ${req.path} -> ${indexPath}`);
+  console.log(`[Server] Serving SPA fallback for ${req.path}`);
   res.sendFile(indexPath, (err) => {
     if (err) {
-      console.error(`[Server] Error serving index.html:`, err);
+      console.error(`[Server] Error serving index.html:`, err.message);
       res.status(404).json({ error: "Frontend not found" });
     }
   });
