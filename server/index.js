@@ -30,7 +30,15 @@ app.use(cookieParser());
 // CORS configuration - allow both local dev and production frontend
 const corsOptions = {
   origin: function (origin, callback) {
-    const allowedOrigins = [FRONTEND_ORIGIN, "http://localhost:8080", "http://localhost:8081", "http://localhost:8082", "https://chekam.onrender.com"];
+    const allowedOrigins = [
+      FRONTEND_ORIGIN, 
+      "http://localhost:8080", 
+      "http://localhost:8081", 
+      "http://localhost:8082", 
+      "https://chekam.onrender.com",
+      "https://chekam.com",
+      "https://www.chekam.com"
+    ];
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
@@ -191,7 +199,6 @@ app.post("/auth/logout", (req, res) => {
   res.json({ ok: true });
 });
 
-// SPA fallback - serve index.html for all unmatched routes
 // SPA fallback - only for non-static routes
 app.get("*", (req, res) => {
   // Don't serve index.html for static assets or API calls
@@ -201,7 +208,11 @@ app.get("*", (req, res) => {
   }
 
   const indexPath = path.join(publicPath, "index.html");
-  console.log(`[Server] Serving SPA fallback for ${req.path}`);
+  // Only log for actual app routes, not bot probing attempts
+  if (!req.path.includes("/.") && !req.path.includes("/config") && !req.path.includes("/admin") && !req.path.includes("storage")) {
+    console.log(`[Server] Serving SPA fallback for ${req.path}`);
+  }
+  
   res.sendFile(indexPath, (err) => {
     if (err) {
       console.error(`[Server] Error serving index.html:`, err.message);
