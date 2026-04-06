@@ -42,7 +42,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 // Serve static frontend files
-const publicPath = path.join(__dirname, "../public");
+const publicPath = path.join(__dirname, "public");
 console.log(`[Server] Serving static files from: ${publicPath}`);
 console.log(`[Server] NODE_ENV: ${process.env.NODE_ENV}`);
 
