@@ -30,7 +30,7 @@ app.use(cookieParser());
 // CORS configuration - allow both local dev and production frontend
 const corsOptions = {
   origin: function (origin, callback) {
-    const allowedOrigins = [FRONTEND_ORIGIN, "http://localhost:8080", "http://localhost:8081", "http://localhost:8082"];
+    const allowedOrigins = [FRONTEND_ORIGIN, "http://localhost:8080", "http://localhost:8081", "http://localhost:8082", "https://chekam.onrender.com"];
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {

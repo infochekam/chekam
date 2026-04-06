@@ -10,6 +10,7 @@ COPY package.json package-lock.json ./
 COPY index.html vite.config.ts tsconfig*.json postcss.config.js tailwind.config.ts ./
 COPY src ./src
 COPY public ./public
+COPY .env ./
 
 # Install dependencies
 RUN npm install
