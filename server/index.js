@@ -53,13 +53,21 @@ app.get("/health", (req, res) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });
 });
 
+// Handle favicon.ico to prevent 404
+app.get("/favicon.ico", (req, res) => {
+  res.status(204).end(); // No Content
+});
+
 app.get("/", (req, res) => {
-  // In production, if we get here, it means index.html wasn't found
-  if (process.env.NODE_ENV === "production") {
-    res.sendFile(path.join(publicPath, "index.html"));
-  } else {
-    res.send("Chekam Auth Server - Frontend not available in development mode");
-  }
+  const indexPath = path.join(publicPath, "index.html");
+  console.log(`[Server] GET / - Attempting to serve index.html from: ${indexPath}`);
+  
+  res.sendFile(indexPath, (err) => {
+    if (err) {
+      console.error(`[Server] Error serving index.html:`, err.message);
+      res.status(200).send("Chekam Auth Server - Frontend not found at " + indexPath);
+    }
+  });
 });
 
 app.get("/auth/oauth/initiate/:provider", (req, res) => {
