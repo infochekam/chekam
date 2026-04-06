@@ -5,12 +5,21 @@ FROM node:18-alpine AS frontend-builder
 
 WORKDIR /app
 
+# Build args for frontend environment variables
+ARG VITE_SUPABASE_URL=https://anyaaafpqpfkivmghhxm.supabase.co
+ARG VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_24DRew9bArvvVCQodRnmJw_N8yOVXaw
+ARG VITE_API_URL=https://chekam.onrender.com
+
+# Set as environment variables so Vite can access them during build
+ENV VITE_SUPABASE_URL=$VITE_SUPABASE_URL
+ENV VITE_SUPABASE_PUBLISHABLE_KEY=$VITE_SUPABASE_PUBLISHABLE_KEY
+ENV VITE_API_URL=$VITE_API_URL
+
 # Copy frontend files
 COPY package.json package-lock.json ./
 COPY index.html vite.config.ts tsconfig*.json postcss.config.js tailwind.config.ts ./
 COPY src ./src
 COPY public ./public
-COPY .env ./
 
 # Install dependencies
 RUN npm install
