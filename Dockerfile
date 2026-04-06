@@ -14,8 +14,11 @@ COPY public ./public
 # Install dependencies
 RUN npm install
 
-# Build frontend
-RUN npm run build
+# Build frontend - with error handling
+RUN npm run build || (echo "Build failed, listing contents:" && ls -la && exit 1)
+
+# Verify build output
+RUN ls -la dist/ || (echo "ERROR: dist/ not found after build" && exit 1)
 
 # Stage 2: Build backend + serve frontend
 FROM node:18-alpine
@@ -33,6 +36,9 @@ RUN npm install --production
 # Copy built frontend from stage 1
 COPY --from=frontend-builder /app/dist ./public
 
+# Verify frontend was copied
+RUN ls -la public/ || (echo "ERROR: public/ not found after copy" && exit 1)
+
 # Set environment
 ENV NODE_ENV=production
 ENV PORT=3000
@@ -41,6 +47,6 @@ EXPOSE 3000
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:3000', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"
+  CMD node -e "require('http').get('http://localhost:3000/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"
 
 CMD ["node", "index.js"]

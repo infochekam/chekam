@@ -41,13 +41,25 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
-// Serve static frontend files in production
-if (process.env.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname, "../public")));
-}
+// Serve static frontend files
+const publicPath = path.join(__dirname, "../public");
+console.log(`[Server] Serving static files from: ${publicPath}`);
+console.log(`[Server] NODE_ENV: ${process.env.NODE_ENV}`);
+
+app.use(express.static(publicPath));
+
+// Health check endpoint
+app.get("/health", (req, res) => {
+  res.json({ status: "ok", timestamp: new Date().toISOString() });
+});
 
 app.get("/", (req, res) => {
-  res.send("Chekam Auth Server");
+  // In production, if we get here, it means index.html wasn't found
+  if (process.env.NODE_ENV === "production") {
+    res.sendFile(path.join(publicPath, "index.html"));
+  } else {
+    res.send("Chekam Auth Server - Frontend not available in development mode");
+  }
 });
 
 app.get("/auth/oauth/initiate/:provider", (req, res) => {
@@ -171,13 +183,19 @@ app.post("/auth/logout", (req, res) => {
   res.json({ ok: true });
 });
 
-// SPA fallback - serve index.html for all unmatched routes (in production)
-if (process.env.NODE_ENV === "production") {
-  app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "../public/index.html"));
+// SPA fallback - serve index.html for all unmatched routes
+app.get("*", (req, res) => {
+  const indexPath = path.join(publicPath, "index.html");
+  console.log(`[Server] Serving SPA fallback for ${req.path} -> ${indexPath}`);
+  res.sendFile(indexPath, (err) => {
+    if (err) {
+      console.error(`[Server] Error serving index.html:`, err);
+      res.status(404).json({ error: "Frontend not found" });
+    }
   });
-}
+});
 
 app.listen(PORT, () => {
-  console.log(`Auth server running on ${AUTH_ORIGIN}`);
+  console.log(`[Server] Auth server running on ${AUTH_ORIGIN}`);
+  console.log(`[Server] Environment: ${process.env.NODE_ENV}`);
 });
