@@ -9,10 +9,13 @@ WORKDIR /app
 ARG VITE_SUPABASE_URL=https://anyaaafpqpfkivmghhxm.supabase.co
 ARG VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_24DRew9bArvvVCQodRnmJw_N8yOVXaw
 ARG VITE_API_URL=https://chekam.onrender.com
+ARG VITE_AUTH_SERVER_ORIGIN=https://chekam.onrender.com
 
 # Set as environment variables so Vite can access them during build
 ENV VITE_SUPABASE_URL=$VITE_SUPABASE_URL
 ENV VITE_SUPABASE_PUBLISHABLE_KEY=$VITE_SUPABASE_PUBLISHABLE_KEY
+ENV VITE_API_URL=$VITE_API_URL
+ENV VITE_AUTH_SERVER_ORIGIN=$VITE_AUTH_SERVER_ORIGIN
 ENV VITE_API_URL=$VITE_API_URL
 
 # Copy frontend files
