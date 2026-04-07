@@ -49,7 +49,7 @@ const InspectionManagement = () => {
     setLoading(true);
     try {
       // Fetch inspections with property details
-      const { data: insps, error: inspErr } = await supabase
+      const { data: insps, error: inspErr } = await (supabase as any)
         .from("inspections")
         .select(
           `
@@ -67,13 +67,13 @@ const InspectionManagement = () => {
       if (inspErr) throw inspErr;
       
       // Fetch inspector profiles separately
-      const inspectorIds = insps
-        ?.filter((i: any) => i.inspector_id)
-        .map((i: any) => i.inspector_id) || [];
+      const inspectorIds = (insps || [])
+      .filter((i: any) => i.inspector_id)
+      .map((i: any) => i.inspector_id) || [];
       
       let inspectorProfiles: Record<string, any> = {};
       if (inspectorIds.length > 0) {
-        const { data: profiles } = await supabase
+        const { data: profiles } = await (supabase as any)
           .from("profiles")
           .select("user_id, first_name, last_name")
           .in("user_id", inspectorIds);
@@ -98,14 +98,14 @@ const InspectionManagement = () => {
       setInspections((inspectionsWithProfiles || []) as unknown as Inspection[]);
 
       // Fetch all inspectors
-      const { data: roles } = await supabase
+      const { data: roles } = await (supabase as any)
         .from("user_roles")
         .select("user_id")
         .eq("role", "inspector");
 
       if (roles && roles.length > 0) {
         const inspectorIds = roles.map((r) => r.user_id);
-        const { data: profiles } = await supabase
+        const { data: profiles } = await (supabase as any)
           .from("profiles")
           .select("user_id, first_name, last_name")
           .in("user_id", inspectorIds);

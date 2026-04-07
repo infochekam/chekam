@@ -40,17 +40,18 @@ const DocumentVerification = () => {
   const fetchPendingDocuments = async () => {
     setLoading(true);
     try {
-      const { data: docs, error } = await supabase
+      const { data: docs, error } = await (supabase as any)
         .from("property_documents")
         .select("*, properties(id, title, user_id)")
-        .neq("verification_status", "pending")
+        .eq("verification_status", "pending")
         .order("created_at", { ascending: false })
         .limit(50);
 
       if (error) throw error;
 
+      const docsArr = (docs || []) as any[];
       setDocuments(
-        (docs || []).map((d: any) => ({
+        docsArr.map((d) => ({
           ...d,
           expandedNotes: d.verification_notes || "",
         }))
@@ -65,7 +66,7 @@ const DocumentVerification = () => {
   const verifyDocument = async (docId: string, status: "verified" | "rejected") => {
     setVerifying(docId);
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from("property_documents")
         .update({
           verification_status: status,
@@ -93,7 +94,7 @@ const DocumentVerification = () => {
       // Create notification for property owner
       const doc = documents.find((d) => d.id === docId);
       if (doc?.properties?.user_id) {
-        const { error: notifErr } = await supabase.from("notifications").insert({
+        const { error: notifErr } = await (supabase as any).from("notifications").insert({
           user_id: doc.properties.user_id,
           type: "document_verified",
           title: status === "verified" ? "Document Verified" : "Document Rejected",
