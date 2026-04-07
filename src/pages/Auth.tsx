@@ -57,8 +57,8 @@ const Auth = () => {
         }
         
         toast.success("Account created!");
-        // Reload page to detect new session
-        setTimeout(() => window.location.reload(), 1000);
+        // Redirect directly to dashboard, bypassing React Router to avoid throttling
+        window.location.href = "/dashboard";
       } else if (mode === "login") {
         const response = await fetch(`${AUTH_SERVER}/auth/signin`, {
           method: "POST",
@@ -73,8 +73,8 @@ const Auth = () => {
         }
         
         toast.success("Login successful!");
-        // Reload page to detect new session
-        setTimeout(() => window.location.reload(), 1000);
+        // Redirect directly to dashboard, bypassing React Router to avoid throttling
+        window.location.href = "/dashboard";
       } else {
         // Password reset via Supabase (keeping this as-is)
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
