@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { auth } from "@/integrations/auth";
@@ -11,7 +11,6 @@ import { toast } from "sonner";
 import logo from "@/assets/chekamlogo.png";
 
 const Auth = () => {
-  const navigate = useNavigate();
   const { session, user, loading } = useAuth();
   const [mode, setMode] = useState<"login" | "signup" | "forgot">("login");
   const [email, setEmail] = useState("");
@@ -58,8 +57,7 @@ const Auth = () => {
         }
         
         toast.success("Account created!");
-        // Small delay to ensure cookie is set, then navigate
-        setTimeout(() => navigate("/dashboard"), 500);
+        // AuthContext will detect the new user session and <Navigate> component will redirect
       } else if (mode === "login") {
         const response = await fetch(`${AUTH_SERVER}/auth/signin`, {
           method: "POST",
@@ -74,8 +72,7 @@ const Auth = () => {
         }
         
         toast.success("Login successful!");
-        // Small delay to ensure cookie is set, then navigate
-        setTimeout(() => navigate("/dashboard"), 500);
+        // AuthContext will detect the new user session and <Navigate> component will redirect
       } else {
         // Password reset via Supabase (keeping this as-is)
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
