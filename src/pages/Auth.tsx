@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { auth } from "@/integrations/auth";
@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import logo from "@/assets/chekamlogo.png";
 
 const Auth = () => {
+  const navigate = useNavigate();
   const { session, loading } = useAuth();
   const [mode, setMode] = useState<"login" | "signup" | "forgot">("login");
   const [email, setEmail] = useState("");
@@ -55,8 +56,9 @@ const Auth = () => {
           throw new Error(error.error || "Signup failed");
         }
         
-        toast.success("Account created! Redirecting...");
-        setTimeout(() => window.location.href = "/dashboard", 1000);
+        toast.success("Account created!");
+        // Small delay to ensure cookie is set, then navigate
+        setTimeout(() => navigate("/dashboard"), 500);
       } else if (mode === "login") {
         const response = await fetch(`${AUTH_SERVER}/auth/signin`, {
           method: "POST",
@@ -70,8 +72,9 @@ const Auth = () => {
           throw new Error(error.error || "Login failed");
         }
         
-        toast.success("Login successful! Redirecting...");
-        setTimeout(() => window.location.href = "/dashboard", 1000);
+        toast.success("Login successful!");
+        // Small delay to ensure cookie is set, then navigate
+        setTimeout(() => navigate("/dashboard"), 500);
       } else {
         // Password reset via Supabase (keeping this as-is)
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
@@ -88,10 +91,11 @@ const Auth = () => {
   };
 
   const handleGoogleSignIn = async () => {
-    const result = await auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
-    });
-    if (result?.error) {
+    try {
+      await auth.signInWithOAuth("google", {
+        redirect_uri: window.location.origin,
+      });
+    } catch (err: any) {
       toast.error("Google sign-in failed. Please try again.");
     }
   };
