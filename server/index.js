@@ -434,8 +434,9 @@ app.post("/auth/logout", (req, res) => {
 // SPA fallback - only for non-static routes
 app.get("*", (req, res) => {
   // Don't serve index.html for static assets or API calls
+  // Note: /auth routes that are handled as endpoints (POST, etc) will match their specific handlers first
   const staticExtensions = /\.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot|map)$/i;
-  if (staticExtensions.test(req.path) || req.path.startsWith("/api") || req.path.startsWith("/auth")) {
+  if (staticExtensions.test(req.path) || req.path.startsWith("/api")) {
     return res.status(404).json({ error: "Not found" });
   }
 
