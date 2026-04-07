@@ -66,7 +66,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     // Also check server-side session (e.g., OAuth via auth server). If present, prefer it.
     fetch(`${import.meta.env.VITE_AUTH_SERVER_ORIGIN || "https://chekam.onrender.com"}/auth/me`, { credentials: "include" })
-      .then((r) => r.json())
+      .then((r) => {
+        // Handle non-200 responses (like 401 for unauthenticated)
+        if (!r.ok) {
+          // 401 is expected for unauthenticated users - not an error
+          if (r.status === 401) {
+            setLoading(false);
+            return null;
+          }
+          throw new Error(`Auth check failed: ${r.status}`);
+        }
+        return r.json();
+      })
       .then((data) => {
         if (!mounted) return;
         if (data?.user) {
