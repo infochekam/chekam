@@ -12,7 +12,7 @@ import logo from "@/assets/chekamlogo.png";
 
 const Auth = () => {
   const navigate = useNavigate();
-  const { session, loading } = useAuth();
+  const { session, user, loading } = useAuth();
   const [mode, setMode] = useState<"login" | "signup" | "forgot">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -28,7 +28,8 @@ const Auth = () => {
     );
   }
 
-  if (session) {
+  // Redirect if user is authenticated (either via Supabase session or backend auth)
+  if (session || user) {
     return <Navigate to="/dashboard" replace />;
   }
 
