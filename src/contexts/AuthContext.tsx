@@ -65,7 +65,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
 
     // Also check server-side session (e.g., OAuth via auth server). If present, prefer it.
-    fetch(`${import.meta.env.VITE_AUTH_SERVER_ORIGIN || "http://localhost:3000"}/auth/me`, { credentials: "include" })
+    fetch(`${import.meta.env.VITE_AUTH_SERVER_ORIGIN || "https://chekam.onrender.com"}/auth/me`, { credentials: "include" })
       .then((r) => r.json())
       .then((data) => {
         if (!mounted) return;
@@ -90,7 +90,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signOut = async () => {
     try {
-      await fetch(`${import.meta.env.VITE_AUTH_SERVER_ORIGIN || "http://localhost:3000"}/auth/logout`, {
+      await fetch(`${import.meta.env.VITE_AUTH_SERVER_ORIGIN || "https://chekam.onrender.com"}/auth/logout`, {
         method: "POST",
         credentials: "include",
       });

@@ -3,7 +3,7 @@
 
 type SignInOptions = { redirect_uri?: string; extraParams?: Record<string, string> };
 
-const AUTH_SERVER = import.meta.env.VITE_AUTH_SERVER_ORIGIN || import.meta.env.VITE_LOVABLE_AUTH_URL || "http://localhost:3000";
+const AUTH_SERVER = import.meta.env.VITE_AUTH_SERVER_ORIGIN || "https://chekam.onrender.com";
 
 export const auth = {
   signInWithOAuth: async (provider: "google" | "apple", opts?: SignInOptions) => {
