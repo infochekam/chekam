@@ -57,8 +57,8 @@ const Auth = () => {
         }
         
         toast.success("Account created!");
-        // Redirect directly to dashboard, bypassing React Router to avoid throttling
-        window.location.href = "/dashboard";
+        // Small delay ensures form processing completes before navigation
+        setTimeout(() => { window.location.href = "/dashboard"; }, 100);
       } else if (mode === "login") {
         const response = await fetch(`${AUTH_SERVER}/auth/signin`, {
           method: "POST",
@@ -73,8 +73,8 @@ const Auth = () => {
         }
         
         toast.success("Login successful!");
-        // Redirect directly to dashboard, bypassing React Router to avoid throttling
-        window.location.href = "/dashboard";
+        // Small delay ensures form processing completes before navigation
+        setTimeout(() => { window.location.href = "/dashboard"; }, 100);
       } else {
         // Password reset via Supabase (keeping this as-is)
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
