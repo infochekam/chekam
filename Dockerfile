@@ -5,20 +5,17 @@ FROM node:18-alpine AS frontend-builder
 
 WORKDIR /app
 
-# Build args for frontend environment variables
-ARG VITE_SUPABASE_URL=https://anyaaafpqpfkivmghhxm.supabase.co
-ARG VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_24DRew9bArvvVCQodRnmJw_N8yOVXaw
-ARG VITE_API_URL=https://chekam.onrender.com
-ARG VITE_AUTH_SERVER_ORIGIN=https://chekam.onrender.com
-
-# Set as environment variables so Vite can access them during build
-ENV VITE_SUPABASE_URL=$VITE_SUPABASE_URL
-ENV VITE_SUPABASE_PUBLISHABLE_KEY=$VITE_SUPABASE_PUBLISHABLE_KEY
-ENV VITE_API_URL=$VITE_API_URL
-ENV VITE_AUTH_SERVER_ORIGIN=$VITE_AUTH_SERVER_ORIGIN
+# Hardcode production values directly (Render doesn't pass build args)
+ENV VITE_SUPABASE_URL=https://anyaaafpqpfkivmghhxm.supabase.co
+ENV VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_24DRew9bArvvVCQodRnmJw_N8yOVXaw
+ENV VITE_API_URL=https://chekam.onrender.com
+ENV VITE_AUTH_SERVER_ORIGIN=https://chekam.onrender.com
 
 # Debug: log the values being used
-RUN echo "Building with: VITE_AUTH_SERVER_ORIGIN=$VITE_AUTH_SERVER_ORIGIN VITE_SUPABASE_URL=$VITE_SUPABASE_URL"
+RUN echo "Building with:" \
+    && echo "  VITE_AUTH_SERVER_ORIGIN=$VITE_AUTH_SERVER_ORIGIN" \
+    && echo "  VITE_SUPABASE_URL=$VITE_SUPABASE_URL" \
+    && echo "  VITE_API_URL=$VITE_API_URL"
 
 # Copy frontend files
 COPY package.json package-lock.json ./
