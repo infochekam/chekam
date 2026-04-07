@@ -37,46 +37,18 @@ const Auth = () => {
     setSubmitting(true);
 
     try {
-      const AUTH_SERVER = import.meta.env.VITE_AUTH_SERVER_ORIGIN || "https://chekam.onrender.com";
-      
       if (mode === "signup") {
-        const response = await fetch(`${AUTH_SERVER}/auth/signup`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({
-            email,
-            password,
-            full_name: `${firstName} ${lastName}`.trim(),
-          }),
-        });
-        
-        if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.error || "Signup failed");
-        }
-        
-        toast.success("Account created!");
-        // Small delay ensures form processing completes before navigation
-        setTimeout(() => { window.location.href = "/dashboard"; }, 100);
+        const full_name = `${firstName} ${lastName}`.trim();
+        const { data, error } = await supabase.auth.signUp({ email, password, options: { data: { full_name } } as any } as any);
+        if (error) throw error;
+        toast.success("Account created! Check your email if confirmation is required.");
+        // Supabase auth state listener will update `session` and redirect via AuthContext
       } else if (mode === "login") {
-        const response = await fetch(`${AUTH_SERVER}/auth/signin`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({ email, password }),
-        });
-        
-        if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.error || "Login failed");
-        }
-        
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password } as any);
+        if (error) throw error;
         toast.success("Login successful!");
-        // Small delay ensures form processing completes before navigation
-        setTimeout(() => { window.location.href = "/dashboard"; }, 100);
+        // Supabase auth state listener will update `session` and redirect via AuthContext
       } else {
-        // Password reset via Supabase (keeping this as-is)
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
           redirectTo: `${window.location.origin}/reset-password`,
         });
