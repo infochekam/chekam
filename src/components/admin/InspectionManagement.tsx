@@ -134,7 +134,7 @@ const InspectionManagement = () => {
 
     setAssigning(inspectionId);
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from("inspections")
         .update({ inspector_id: inspectorId, status: "in_progress" })
         .eq("id", inspectionId);
