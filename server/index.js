@@ -148,8 +148,17 @@ app.post("/auth/signup", async (req, res) => {
     console.log("[Auth] Password hashed");
     
     // Check if user already exists
-    const { data: existing } = await supabaseAdmin.from("auth_users").select("id").eq("email", email).single();
-    if (existing) {
+    const { data: existing, error: existingErr } = await supabaseAdmin
+      .from("auth_users")
+      .select("id")
+      .match({ email });
+    
+    if (existingErr) {
+      console.error("[Auth] Error checking existing user:", existingErr.message);
+      return res.status(500).json({ error: "Auth service error: " + existingErr.message });
+    }
+    
+    if (existing && existing.length > 0) {
       console.log("[Auth] User already exists");
       return res.status(400).json({ error: "Email already registered" });
     }
@@ -205,19 +214,26 @@ app.post("/auth/signin", async (req, res) => {
       return res.status(500).json({ error: "Auth service not configured" });
     }
 
-    // Find user
-    const { data: user, error: queryErr } = await supabaseAdmin
+    // Find user - use match instead of eq to avoid .single() issues
+    const { data: users, error: queryErr } = await supabaseAdmin
       .from("auth_users")
       .select("id, email, password_hash, full_name")
-      .eq("email", email)
-      .single();
+      .match({ email });
 
-    console.log("[Auth] Query result:", { queryErr: queryErr?.message, userFound: !!user });
+    console.log("[Auth] Query result:", { queryErr: queryErr?.message, usersFound: users?.length || 0 });
 
-    if (queryErr || !user) {
-      console.log("[Auth] User not found or query error");
+    if (queryErr) {
+      console.error("[Auth] Query error:", queryErr.message);
+      // If table doesn't exist, it's a 500 error
+      return res.status(500).json({ error: "Auth service error: " + queryErr.message });
+    }
+
+    if (!users || users.length === 0) {
+      console.log("[Auth] User not found");
       return res.status(401).json({ error: "Invalid email or password" });
     }
+
+    const user = users[0];
 
     // Verify password
     const passwordMatch = await bcrypt.compare(password, user.password_hash);
@@ -241,10 +257,11 @@ app.post("/auth/signin", async (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
+    console.log("[Auth] Signin successful for:", email);
     res.json({ user: { id: user.id, email: user.email, name: user.full_name }, ok: true });
   } catch (error) {
     console.error("[Auth] Signin error:", error.message);
-    res.status(500).json({ error: "Signin failed" });
+    res.status(500).json({ error: "Signin failed: " + error.message });
   }
 });
 
