@@ -45,7 +45,12 @@ const Auth = () => {
     try {
       if (mode === "signup") {
         const full_name = `${firstName} ${lastName}`.trim();
-        const { data, error } = await supabase.auth.signUp({ email, password, options: { data: { full_name } } as any } as any);
+        const redirectBase = import.meta.env.VITE_FRONTEND_ORIGIN || window.location.origin;
+        const { data, error } = await (supabase.auth as any).signUp({
+          email,
+          password,
+          options: { data: { full_name }, redirectTo: `${redirectBase}/auth` },
+        });
         if (error) throw error;
         toast.success("Account created! Check your email if confirmation is required.");
         // Supabase auth state listener will update `session` and redirect via AuthContext
