@@ -57,7 +57,8 @@ const Auth = () => {
         }
         
         toast.success("Account created!");
-        // AuthContext will detect the new user session and <Navigate> component will redirect
+        // Reload page to detect new session
+        setTimeout(() => window.location.reload(), 1000);
       } else if (mode === "login") {
         const response = await fetch(`${AUTH_SERVER}/auth/signin`, {
           method: "POST",
@@ -72,7 +73,8 @@ const Auth = () => {
         }
         
         toast.success("Login successful!");
-        // AuthContext will detect the new user session and <Navigate> component will redirect
+        // Reload page to detect new session
+        setTimeout(() => window.location.reload(), 1000);
       } else {
         // Password reset via Supabase (keeping this as-is)
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
