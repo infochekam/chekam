@@ -6,6 +6,7 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
+import bcrypt from "bcrypt";
 
 dotenv.config();
 
@@ -119,6 +120,108 @@ app.post("/api/auth/token", async (req, res) => {
   } catch (error) {
     console.error("[Server] Supabase proxy error:", error.message);
     res.status(500).json({ error: "Auth proxy failed" });
+  }
+});
+
+// Email/Password signup
+app.post("/auth/signup", async (req, res) => {
+  try {
+    const { email, password, full_name } = req.body;
+    
+    if (!email || !password) {
+      return res.status(400).json({ error: "Email and password required" });
+    }
+    
+    if (password.length < 6) {
+      return res.status(400).json({ error: "Password must be at least 6 characters" });
+    }
+
+    // Hash password
+    const password_hash = await bcrypt.hash(password, 10);
+    
+    // Check if user already exists
+    const { data: existing } = await supabaseAdmin.from("auth_users").select("id").eq("email", email).single();
+    if (existing) {
+      return res.status(400).json({ error: "Email already registered" });
+    }
+
+    // Create user
+    const { data: user, error: insertErr } = await supabaseAdmin
+      .from("auth_users")
+      .insert([{ email, password_hash, full_name }])
+      .select()
+      .single();
+
+    if (insertErr) {
+      console.error("Signup error:", insertErr);
+      return res.status(500).json({ error: "Failed to create user" });
+    }
+
+    // Create JWT session
+    const sessionToken = jwt.sign(
+      { sub: user.id, email: user.email, name: user.full_name, provider: "email" },
+      SESSION_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    res.cookie("chekam_session", sessionToken, {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    res.json({ user: { id: user.id, email: user.email, name: user.full_name }, ok: true });
+  } catch (error) {
+    console.error("[Auth] Signup error:", error.message);
+    res.status(500).json({ error: "Signup failed" });
+  }
+});
+
+// Email/Password signin
+app.post("/auth/signin", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    
+    if (!email || !password) {
+      return res.status(400).json({ error: "Email and password required" });
+    }
+
+    // Find user
+    const { data: user, error: queryErr } = await supabaseAdmin
+      .from("auth_users")
+      .select("id, email, password_hash, full_name")
+      .eq("email", email)
+      .single();
+
+    if (queryErr || !user) {
+      return res.status(401).json({ error: "Invalid email or password" });
+    }
+
+    // Verify password
+    const passwordMatch = await bcrypt.compare(password, user.password_hash);
+    if (!passwordMatch) {
+      return res.status(401).json({ error: "Invalid email or password" });
+    }
+
+    // Create JWT session
+    const sessionToken = jwt.sign(
+      { sub: user.id, email: user.email, name: user.full_name, provider: "email" },
+      SESSION_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    res.cookie("chekam_session", sessionToken, {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    res.json({ user: { id: user.id, email: user.email, name: user.full_name }, ok: true });
+  } catch (error) {
+    console.error("[Auth] Signin error:", error.message);
+    res.status(500).json({ error: "Signin failed" });
   }
 });
 

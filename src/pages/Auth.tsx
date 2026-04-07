@@ -36,22 +36,44 @@ const Auth = () => {
     setSubmitting(true);
 
     try {
+      const AUTH_SERVER = import.meta.env.VITE_AUTH_SERVER_ORIGIN || "https://chekam.onrender.com";
+      
       if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: window.location.origin,
-            data: { first_name: firstName, last_name: lastName },
-          },
+        const response = await fetch(`${AUTH_SERVER}/auth/signup`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            email,
+            password,
+            full_name: `${firstName} ${lastName}`.trim(),
+          }),
         });
-        if (error) throw error;
-        toast.success("Check your email to confirm your account!");
+        
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || "Signup failed");
+        }
+        
+        toast.success("Account created! Redirecting...");
+        setTimeout(() => window.location.href = "/dashboard", 1000);
       } else if (mode === "login") {
-        const result = await supabase.auth.signInWithPassword({ email, password });
-        console.debug("supabase signInWithPassword result:", result);
-        if (result.error) throw result.error;
+        const response = await fetch(`${AUTH_SERVER}/auth/signin`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ email, password }),
+        });
+        
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || "Login failed");
+        }
+        
+        toast.success("Login successful! Redirecting...");
+        setTimeout(() => window.location.href = "/dashboard", 1000);
       } else {
+        // Password reset via Supabase (keeping this as-is)
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
           redirectTo: `${window.location.origin}/reset-password`,
         });
