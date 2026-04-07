@@ -26,9 +26,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const { data } = await supabase
       .from("user_roles")
       .select("role")
-      .eq("user_id", userId);
-    if (data) {
-      setRoles(data.map((r) => r.role));
+      .match({ user_id: userId });
+    if (data && data.length > 0) {
+      setRoles(data.map((r: any) => r.role));
     }
   };
 

@@ -66,44 +66,49 @@ const PropertyDetails = () => {
         const { data: prop, error: propErr } = await supabase
           .from("properties")
           .select("*")
-          .eq("id", propertyId)
-          .eq("user_id", user.id)
+          .match({ id: propertyId, user_id: user.id })
           .single();
 
         if (propErr) throw propErr;
-        setProperty(prop);
+        const property = prop as any;
+        setProperty(property);
 
         // Fetch documents if document_upload method
-        if (prop.submission_method === "document_upload") {
-          const { data: docs } = await supabase
+        if (property && property.submission_method === "document_upload") {
+          const { data: docs, error: docsErr } = await supabase
             .from("property_documents")
-            .select("id, file_name, document_type, verification_status")
-            .eq("property_id", propertyId);
-          setDocuments((docs as PropertyDocument[]) || []);
+            .select("id, file_name, document_type, verification_status");
+          if (!docsErr && docs) {
+            setDocuments(docs as PropertyDocument[]);
+          }
         }
 
         // Fetch inspection
-        const { data: insp } = await supabase
+        const { data: insp, error: inspErr } = await supabase
           .from("inspections")
-          .select("*")
-          .eq("property_id", propertyId)
+          .select("*", { count: "exact" })
+          .match({ property_id: propertyId })
           .single();
 
-        if (insp) {
-          setInspection(insp);
+        if (!inspErr && insp) {
+          const inspection = insp as any;
+          setInspection(inspection);
 
           // Fetch inspector details if assigned
-          if (insp.inspector_id) {
-            const { data: inspectorData } = await supabase
+          if (inspection.inspector_id) {
+            const { data: inspectorData, error: inspectorErr } = await supabase
               .from("profiles")
               .select("first_name, last_name")
-              .eq("user_id", insp.inspector_id)
+              .match({ user_id: inspection.inspector_id })
               .single();
-            setInspector(inspectorData);
+            if (!inspectorErr && inspectorData) {
+              setInspector(inspectorData as Inspector);
+            }
           }
         }
-      } catch (err: any) {
-        toast.error(err.message || "Failed to load property");
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : "Failed to load property";
+        toast.error(errorMessage);
         navigate("/dashboard");
       } finally {
         setLoading(false);

@@ -56,11 +56,17 @@ app.all("/api/supabase/*", async (req, res) => {
     const supabaseUrl = process.env.SUPABASE_URL;
     const anonKey = process.env.SUPABASE_ANON_KEY;
     
+    if (!supabaseUrl || !anonKey) {
+      console.error("[Proxy] Missing SUPABASE_URL or SUPABASE_ANON_KEY");
+      return res.status(500).json({ error: "Proxy not configured" });
+    }
+    
     // Build the full URL with query params
     const queryString = new URLSearchParams(req.query).toString();
-    const fullUrl = `${supabaseUrl}${supabasePath}${queryString ? '?' + queryString : ''}`;
+    const fullUrl = `${supabaseUrl}/${supabasePath}${queryString ? '?' + queryString : ''}`;
     
     console.log(`[Proxy] ${req.method} ${fullUrl}`);
+    console.log(`[Proxy] Headers: Authorization=${req.headers.authorization?.substring(0, 20)}...`);
     
     const response = await fetch(fullUrl, {
       method: req.method,
@@ -72,11 +78,19 @@ app.all("/api/supabase/*", async (req, res) => {
       body: ["GET", "HEAD"].includes(req.method) ? undefined : JSON.stringify(req.body),
     });
     
-    const data = await response.json();
+    const text = await response.text();
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch {
+      data = text;
+    }
+    
+    console.log(`[Proxy] Response: ${response.status}`);
     res.status(response.status).json(data);
   } catch (error) {
     console.error("[Proxy] Supabase proxy error:", error.message);
-    res.status(500).json({ error: "Supabase proxy failed" });
+    res.status(500).json({ error: "Supabase proxy failed", message: error.message });
   }
 });
 
