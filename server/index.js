@@ -28,6 +28,16 @@ const supabaseAdmin = SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY ? createClient(S
 app.use(express.json());
 app.use(cookieParser());
 
+// Request logging middleware
+app.use((req, res, next) => {
+  const originalJson = res.json;
+  res.json = function(data) {
+    console.log(`[Server] ${req.method} ${req.path} -> ${res.statusCode}`);
+    return originalJson.call(this, data);
+  };
+  next();
+});
+
 // CORS configuration - allow both local dev and production frontend
 const corsOptions = {
   origin: function (origin, callback) {
@@ -49,6 +59,9 @@ const corsOptions = {
   credentials: true,
 };
 app.use(cors(corsOptions));
+
+// Explicitly handle OPTIONS for CORS preflight
+app.options("*", cors(corsOptions));
 
 // Generic Supabase proxy - forward all API requests through backend to bypass DNS issues
 app.all("/api/supabase/*", async (req, res) => {
@@ -191,7 +204,9 @@ app.post("/auth/signup", async (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    res.json({ user: { id: user.id, email: user.email, name: user.full_name }, ok: true });
+    console.log("[Auth] Signup successful for:", user.id);
+    console.log("[Auth] Cookie set, sending success response");
+    res.status(200).json({ user: { id: user.id, email: user.email, name: user.full_name }, ok: true });
   } catch (error) {
     console.error("[Auth] Signup error:", error.message);
     res.status(500).json({ error: "Signup failed" });
@@ -258,7 +273,8 @@ app.post("/auth/signin", async (req, res) => {
     });
 
     console.log("[Auth] Signin successful for:", email);
-    res.json({ user: { id: user.id, email: user.email, name: user.full_name }, ok: true });
+    console.log("[Auth] Cookie set, sending success response");
+    res.status(200).json({ user: { id: user.id, email: user.email, name: user.full_name }, ok: true });
   } catch (error) {
     console.error("[Auth] Signin error:", error.message);
     res.status(500).json({ error: "Signin failed: " + error.message });
