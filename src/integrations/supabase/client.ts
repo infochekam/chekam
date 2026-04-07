@@ -4,47 +4,50 @@ import type { Database } from './types';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+const AUTH_SERVER_ORIGIN = import.meta.env.VITE_AUTH_SERVER_ORIGIN || "https://chekam.onrender.com";
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
-
-const AUTH_SERVER_ORIGIN = import.meta.env.VITE_AUTH_SERVER_ORIGIN || "https://chekam.onrender.com";
 
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   auth: {
     storage: localStorage,
     persistSession: true,
     autoRefreshToken: true,
-    // Route auth requests through our backend to bypass DNS blocking
-    fetch: async (url, options) => {
-      // Intercept Supabase token requests and route through our backend
-      if (url.includes('/auth/v1/token')) {
-        try {
-          const params = new URL(url).searchParams;
-          const grantType = params.get('grant_type');
-          const body = JSON.parse(options?.body as string || '{}');
-          
-          const response = await fetch(`${AUTH_SERVER_ORIGIN}/api/auth/token`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({
-              grant_type: grantType,
-              username: body.email,
-              password: body.password,
-              refresh_token: body.refresh_token,
-            }),
-          });
-          
-          return response;
-        } catch (error) {
-          console.error('Auth proxy failed:', error);
-          // Fall back to direct request
-        }
-      }
+  },
+  // Route all requests through our backend proxy to bypass DNS blocking
+  fetch: async (url, options) => {
+    try {
+      // Extract the path after the Supabase URL
+      const supabaseUrl = new URL(SUPABASE_URL);
+      const requestUrl = new URL(url);
       
-      // For all other requests, use default fetch
-      return fetch(url, options);
+      // Check if this is a Supabase request
+      if (requestUrl.hostname === supabaseUrl.hostname) {
+        const path = requestUrl.pathname + requestUrl.search;
+        
+        // Route through our proxy
+        const proxyUrl = `${AUTH_SERVER_ORIGIN}/api/supabase${path}`;
+        
+        console.log('[Supabase Proxy] Routing through:', proxyUrl);
+        
+        const response = await fetch(proxyUrl, {
+          ...options,
+          headers: {
+            ...options?.headers,
+            'Authorization': options?.headers?.['Authorization'] || `Bearer ${SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          credentials: 'include',
+        });
+        
+        return response;
+      }
+    } catch (error) {
+      console.error('[Supabase Proxy] Error:', error);
+      // Fall through to regular fetch
     }
+    
+    // For non-Supabase requests, use default fetch
+    return fetch(url, options);
   }
 });

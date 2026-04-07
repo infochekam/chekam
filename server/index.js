@@ -49,7 +49,38 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
-// Proxy for Supabase auth requests (to work around DNS blocking issues)
+// Generic Supabase proxy - forward all API requests through backend to bypass DNS issues
+app.all("/api/supabase/*", async (req, res) => {
+  try {
+    const supabasePath = req.params[0]; // Get the path after /api/supabase/
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const anonKey = process.env.SUPABASE_ANON_KEY;
+    
+    // Build the full URL with query params
+    const queryString = new URLSearchParams(req.query).toString();
+    const fullUrl = `${supabaseUrl}${supabasePath}${queryString ? '?' + queryString : ''}`;
+    
+    console.log(`[Proxy] ${req.method} ${fullUrl}`);
+    
+    const response = await fetch(fullUrl, {
+      method: req.method,
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": anonKey,
+        "Authorization": req.headers.authorization || `Bearer ${anonKey}`,
+      },
+      body: ["GET", "HEAD"].includes(req.method) ? undefined : JSON.stringify(req.body),
+    });
+    
+    const data = await response.json();
+    res.status(response.status).json(data);
+  } catch (error) {
+    console.error("[Proxy] Supabase proxy error:", error.message);
+    res.status(500).json({ error: "Supabase proxy failed" });
+  }
+});
+
+// Specific auth token proxy (kept for backward compatibility)
 app.post("/api/auth/token", async (req, res) => {
   try {
     const { grant_type, username, password, refresh_token } = req.body;
