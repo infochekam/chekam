@@ -199,7 +199,7 @@ app.post("/auth/signup", async (req, res) => {
 
     res.cookie("chekam_session", sessionToken, {
       httpOnly: true,
-      sameSite: "lax",
+      sameSite: "none",
       secure: process.env.NODE_ENV === "production",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
@@ -267,7 +267,7 @@ app.post("/auth/signin", async (req, res) => {
 
     res.cookie("chekam_session", sessionToken, {
       httpOnly: true,
-      sameSite: "lax",
+      sameSite: "none",
       secure: process.env.NODE_ENV === "production",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
@@ -386,7 +386,7 @@ app.get("/auth/oauth/callback/:provider", async (req, res) => {
 
       res.cookie("chekam_session", sessionToken, {
         httpOnly: true,
-        sameSite: "lax",
+        sameSite: "none",
         secure: process.env.NODE_ENV === "production",
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
