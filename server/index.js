@@ -128,6 +128,8 @@ app.post("/auth/signup", async (req, res) => {
   try {
     const { email, password, full_name } = req.body;
     
+    console.log("[Auth] Signup attempt for:", email);
+    
     if (!email || !password) {
       return res.status(400).json({ error: "Email and password required" });
     }
@@ -136,12 +138,19 @@ app.post("/auth/signup", async (req, res) => {
       return res.status(400).json({ error: "Password must be at least 6 characters" });
     }
 
+    if (!supabaseAdmin) {
+      console.error("[Auth] Supabase admin client not initialized");
+      return res.status(500).json({ error: "Auth service not configured" });
+    }
+
     // Hash password
     const password_hash = await bcrypt.hash(password, 10);
+    console.log("[Auth] Password hashed");
     
     // Check if user already exists
     const { data: existing } = await supabaseAdmin.from("auth_users").select("id").eq("email", email).single();
     if (existing) {
+      console.log("[Auth] User already exists");
       return res.status(400).json({ error: "Email already registered" });
     }
 
@@ -156,6 +165,8 @@ app.post("/auth/signup", async (req, res) => {
       console.error("Signup error:", insertErr);
       return res.status(500).json({ error: "Failed to create user" });
     }
+
+    console.log("[Auth] User created:", user.id);
 
     // Create JWT session
     const sessionToken = jwt.sign(
@@ -183,8 +194,15 @@ app.post("/auth/signin", async (req, res) => {
   try {
     const { email, password } = req.body;
     
+    console.log("[Auth] Signin attempt for:", email);
+    
     if (!email || !password) {
       return res.status(400).json({ error: "Email and password required" });
+    }
+
+    if (!supabaseAdmin) {
+      console.error("[Auth] Supabase admin client not initialized");
+      return res.status(500).json({ error: "Auth service not configured" });
     }
 
     // Find user
@@ -194,12 +212,17 @@ app.post("/auth/signin", async (req, res) => {
       .eq("email", email)
       .single();
 
+    console.log("[Auth] Query result:", { queryErr: queryErr?.message, userFound: !!user });
+
     if (queryErr || !user) {
+      console.log("[Auth] User not found or query error");
       return res.status(401).json({ error: "Invalid email or password" });
     }
 
     // Verify password
     const passwordMatch = await bcrypt.compare(password, user.password_hash);
+    console.log("[Auth] Password match:", passwordMatch);
+    
     if (!passwordMatch) {
       return res.status(401).json({ error: "Invalid email or password" });
     }
