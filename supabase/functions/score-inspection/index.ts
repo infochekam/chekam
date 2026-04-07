@@ -1,13 +1,28 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+const ALLOWED_ORIGINS = [
+  Deno.env.get("FRONTEND_ORIGIN") || "https://www.chekam.com",
+  "https://chekam.onrender.com",
+  "http://localhost:5173",
+  "http://localhost:3000",
+];
+
+const makeCorsHeaders = (origin: string | null) => {
+  const allowed = origin && ALLOWED_ORIGINS.includes(origin) ? origin : "*";
+  return {
+    "Access-Control-Allow-Origin": allowed,
+    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+    "Access-Control-Allow-Credentials": "true",
+  } as Record<string, string>;
 };
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+  const origin = req.headers.get("origin");
+  if (req.method === "OPTIONS") {
+    return new Response(null, { status: 204, headers: makeCorsHeaders(origin) });
+  }
 
   try {
     const authHeader = req.headers.get("Authorization");
@@ -128,12 +143,14 @@ Based on the media descriptions and property context, provide realistic facility
       const status = aiResponse.status;
       if (status === 429) {
         return new Response(JSON.stringify({ error: "Rate limit exceeded, please try again later." }), {
-          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 429,
+          headers: { ...makeCorsHeaders(req.headers.get("origin")), "Content-Type": "application/json" },
         });
       }
       if (status === 402) {
         return new Response(JSON.stringify({ error: "AI credits exhausted. Please add funds." }), {
-          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 402,
+          headers: { ...makeCorsHeaders(req.headers.get("origin")), "Content-Type": "application/json" },
         });
       }
       throw new Error(`AI gateway error: ${status}`);
@@ -170,12 +187,13 @@ Based on the media descriptions and property context, provide realistic facility
     if (updateErr) throw updateErr;
 
     return new Response(JSON.stringify({ success: true, scores }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      headers: { ...makeCorsHeaders(req.headers.get("origin")), "Content-Type": "application/json" },
     });
   } catch (e) {
     console.error("score-inspection error:", e);
     return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
-      status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 400,
+      headers: { ...makeCorsHeaders(origin), "Content-Type": "application/json" },
     });
   }
 });
