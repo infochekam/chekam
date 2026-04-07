@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Navigate } from "react-router-dom";
+import { useState, useEffect, useRef } from "react";
+import { Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { auth } from "@/integrations/auth";
@@ -27,10 +27,16 @@ const Auth = () => {
     );
   }
 
-  // Redirect if user is authenticated (either via Supabase session or backend auth)
-  if (session || user) {
-    return <Navigate to="/dashboard" replace />;
-  }
+  const navigate = useNavigate();
+  const redirectedRef = useRef(false);
+
+  // Guarded redirect to avoid multiple competing navigations
+  useEffect(() => {
+    if ((session || user) && !redirectedRef.current) {
+      redirectedRef.current = true;
+      navigate("/dashboard", { replace: true });
+    }
+  }, [session, user, navigate]);
 
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
