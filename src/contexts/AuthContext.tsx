@@ -73,13 +73,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           // server session exists; set user from server (this doesn't populate supabase client session)
           setSession(null);
           setUser(data.user as any);
-          // fetch roles for server session user as well
-          fetchRoles(data.user.id);
-          setLoading(false);
+          // set roles returned from /auth/me endpoint
+          if (data?.roles && data.roles.length > 0) {
+            setRoles(data.roles);
+          }
         }
+        setLoading(false);
       })
       .catch(() => {
-        // ignore
+        if (!mounted) return;
+        setLoading(false);
       });
 
     return () => {
