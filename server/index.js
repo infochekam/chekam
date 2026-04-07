@@ -49,6 +49,34 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
+// Proxy for Supabase auth requests (to work around DNS blocking issues)
+app.post("/api/auth/token", async (req, res) => {
+  try {
+    const { grant_type, username, password, refresh_token } = req.body;
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const anonKey = process.env.SUPABASE_ANON_KEY;
+    
+    const response = await fetch(`${supabaseUrl}/auth/v1/token?grant_type=${grant_type}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": anonKey,
+      },
+      body: JSON.stringify({
+        email: username,
+        password,
+        refresh_token,
+      }),
+    });
+    
+    const data = await response.json();
+    res.status(response.status).json(data);
+  } catch (error) {
+    console.error("[Server] Supabase proxy error:", error.message);
+    res.status(500).json({ error: "Auth proxy failed" });
+  }
+});
+
 // Serve static frontend files
 const publicPath = path.join(__dirname, "public");
 console.log(`[Server] Serving static files from: ${publicPath}`);

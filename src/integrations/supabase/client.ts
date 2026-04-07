@@ -8,10 +8,43 @@ const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
+const AUTH_SERVER_ORIGIN = import.meta.env.VITE_AUTH_SERVER_ORIGIN || "https://chekam.onrender.com";
+
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   auth: {
     storage: localStorage,
     persistSession: true,
     autoRefreshToken: true,
+    // Route auth requests through our backend to bypass DNS blocking
+    fetch: async (url, options) => {
+      // Intercept Supabase token requests and route through our backend
+      if (url.includes('/auth/v1/token')) {
+        try {
+          const params = new URL(url).searchParams;
+          const grantType = params.get('grant_type');
+          const body = JSON.parse(options?.body as string || '{}');
+          
+          const response = await fetch(`${AUTH_SERVER_ORIGIN}/api/auth/token`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({
+              grant_type: grantType,
+              username: body.email,
+              password: body.password,
+              refresh_token: body.refresh_token,
+            }),
+          });
+          
+          return response;
+        } catch (error) {
+          console.error('Auth proxy failed:', error);
+          // Fall back to direct request
+        }
+      }
+      
+      // For all other requests, use default fetch
+      return fetch(url, options);
+    }
   }
 });
