@@ -64,37 +64,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setLoading(false);
     });
 
-    // Also check server-side session (e.g., OAuth via auth server). If present, prefer it.
-    fetch(`${import.meta.env.VITE_AUTH_SERVER_ORIGIN || "https://chekam.onrender.com"}/auth/me`, { credentials: "include" })
-      .then((r) => {
-        // Handle non-200 responses (like 401 for unauthenticated)
-        if (!r.ok) {
-          // 401 is expected for unauthenticated users - not an error
-          if (r.status === 401) {
-            setLoading(false);
-            return null;
-          }
-          throw new Error(`Auth check failed: ${r.status}`);
-        }
-        return r.json();
-      })
-      .then((data) => {
-        if (!mounted) return;
-        if (data?.user) {
-          // server session exists; set user from server (this doesn't populate supabase client session)
-          setSession(null);
-          setUser(data.user as any);
-          // set roles returned from /auth/me endpoint
-          if (data?.roles && data.roles.length > 0) {
-            setRoles(data.roles);
-          }
-        }
-        setLoading(false);
-      })
-      .catch(() => {
-        if (!mounted) return;
-        setLoading(false);
-      });
+    // No server-side session check here — rely on Supabase client session only.
 
     return () => {
       mounted = false;
