@@ -22,9 +22,13 @@ interface ManualEntryData {
   in_estate?: boolean;
   gate_quality?: number; // 0-10
   guards_present?: boolean;
+  cctv_present?: boolean;
+  guard_hours_per_day?: number; // 0-24
 
   proximity_km?: number;
   neighborhood_score?: number; // 0-10
+  flood_risk?: number; // 0-10
+  road_access?: number; // 0-10
 
   landlord_on_site?: boolean;
   shared_household?: number;
@@ -35,6 +39,21 @@ interface ManualEntryData {
   bathrooms?: number;
   kitchen_quality?: number; // 0-10
   parking_space?: boolean;
+  parking_capacity?: number;
+  building_age_years?: number;
+
+  // utilities and infrastructure
+  generator_present?: boolean;
+  generator_kva?: number;
+  solar_provision?: boolean;
+  backup_hours?: number;
+  nepa_hours_per_day?: number;
+  water_storage?: boolean;
+  borehole_present?: boolean;
+  septic_tank?: boolean;
+  internet_fibre?: boolean;
+  estate_management?: boolean;
+  service_charge_amount?: number;
 
   // optional remarks
   compound_remarks?: string;
@@ -126,6 +145,22 @@ const ManualEntryTab = ({ data, onChange }: ManualEntryTabProps) => {
           </div>
         </div>
       </div>
+      <div className="grid gap-4 sm:grid-cols-3 mt-2">
+        <div className="space-y-2">
+          <Label>Generator present</Label>
+          <Switch checked={!!data.generator_present} onCheckedChange={(v) => update("generator_present", !!v)} />
+        </div>
+        <div className="space-y-2">
+          <Label>Generator KVA (if present)</Label>
+          <Input type="number" min={0} value={String(data.generator_kva ?? "")}
+            onChange={(e) => update("generator_kva", Number(e.target.value))} />
+        </div>
+        <div className="space-y-2">
+          <Label>NEPA hours per day</Label>
+          <Input type="number" min={0} max={24} value={String(data.nepa_hours_per_day ?? "")}
+            onChange={(e) => update("nepa_hours_per_day", Number(e.target.value))} />
+        </div>
+      </div>
 
       <div className="grid gap-4 sm:grid-cols-3">
         <div className="space-y-2">
@@ -152,6 +187,26 @@ const ManualEntryTab = ({ data, onChange }: ManualEntryTabProps) => {
         <div className="space-y-2">
           <Label>In estate</Label>
           <Switch checked={!!data.in_estate} onCheckedChange={(v) => update("in_estate", !!v)} />
+        </div>
+      </div>
+      <div className="grid gap-4 sm:grid-cols-3 mt-2">
+        <div className="space-y-2">
+          <Label>CCTV present</Label>
+          <Switch checked={!!data.cctv_present} onCheckedChange={(v) => update("cctv_present", !!v)} />
+        </div>
+        <div className="space-y-2">
+          <Label>Guards present</Label>
+          <Switch checked={!!data.guards_present} onCheckedChange={(v) => update("guards_present", !!v)} />
+        </div>
+        <div className="space-y-2">
+          <Label>Flood risk (0-10)</Label>
+          <Input type="number" min={0} max={10} value={String(data.flood_risk ?? "")}
+            onChange={(e) => update("flood_risk", Number(e.target.value))} />
+        </div>
+        <div className="space-y-2">
+          <Label>Road access (0-10)</Label>
+          <Input type="number" min={0} max={10} value={String(data.road_access ?? "")}
+            onChange={(e) => update("road_access", Number(e.target.value))} />
         </div>
       </div>
 
