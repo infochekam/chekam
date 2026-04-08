@@ -39,8 +39,8 @@ WORKDIR /app
 
 # Copy backend files and package
 COPY server/package*.json ./
-COPY server/index.js ./
-COPY server/promote-admin.js ./
+# Copy all server files so helpers like computeScores.js are included in the image
+COPY server/ ./
 
 # Install production dependencies only
 RUN npm install --production
