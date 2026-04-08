@@ -40,37 +40,13 @@ const SubmitProperty = () => {
   // Link state
   const [propertyLink, setPropertyLink] = useState("");
 
-  // Manual entry state
+  // Manual entry state (simple for submit flow)
   const [manualData, setManualData] = useState<any>({
     address: "",
     city: "",
     state: "",
     propertyType: "",
     description: "",
-
-    power_reliability: 5,
-    water_availability: false,
-    garbage_collection: false,
-    drainage_quality: 5,
-    drainage_altitude_risk: 0,
-
-    fenced: false,
-    in_estate: false,
-    gate_quality: 5,
-    guards_present: false,
-
-    proximity_km: 5,
-    neighborhood_score: 5,
-
-    landlord_on_site: false,
-    shared_household: 0,
-    tenant_privacy_score: 5,
-
-    bedrooms: 1,
-    ventilation_score: 5,
-    bathrooms: 1,
-    kitchen_quality: 5,
-    parking_space: false,
   });
 
   const validate = (): boolean => {
