@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import MediaUploader from "@/components/inspection/MediaUploader";
 import MediaGallery from "@/components/inspection/MediaGallery";
 import ScoreCard from "@/components/inspection/ScoreCard";
+import ManualEntryTab from "@/components/property/ManualEntryTab";
 import logo from "@/assets/chekamlogo.png";
 
 interface InspectionData {
@@ -44,9 +45,10 @@ const statusColors: Record<string, string> = {
 
 const Inspection = () => {
   const { id } = useParams<{ id: string }>();
-  const { user, hasRole } = useAuth();
+  const { user, hasRole, session } = useAuth();
   const [inspection, setInspection] = useState<InspectionData | null>(null);
   const [scores, setScores] = useState<ScoreItem[]>([]);
+  const [manualData, setManualData] = useState<any>({});
   const [loading, setLoading] = useState(true);
   const [scoring, setScoring] = useState(false);
   const [mediaRefresh, setMediaRefresh] = useState(0);
@@ -64,6 +66,16 @@ const Inspection = () => {
       .single();
 
     setInspection(insp as unknown as InspectionData);
+    // seed manual data from inspector_report if available
+    if (insp && insp.inspector_report) {
+      try {
+        setManualData(insp.inspector_report);
+      } catch (e) {
+        setManualData({});
+      }
+    } else {
+      setManualData({});
+    }
 
     const { data: scoreData } = await supabase
       .from("inspection_scores")
@@ -189,6 +201,69 @@ const Inspection = () => {
             />
           </CardContent>
         </Card>
+
+        {/* Structured Manual Entry for inspector */}
+        {canManage && user && inspection.inspector_id && (inspection.inspector_id === user.id || hasRole("admin")) && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Inspector Manual Entry</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ManualEntryTab data={manualData || {}} onChange={setManualData} />
+              <div className="flex gap-2 mt-4">
+                <Button
+                  onClick={async () => {
+                    try {
+                      const token = session?.access_token;
+                      const resp = await fetch(`/api/inspections/${inspection.id}/score-structured`, {
+                        method: "POST",
+                        headers: {
+                          "Content-Type": "application/json",
+                          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                        },
+                        body: JSON.stringify(manualData || {}),
+                      });
+                      const body = await resp.json().catch(() => ({}));
+                      if (!resp.ok) throw new Error(body?.error || `Scoring failed (${resp.status})`);
+                      toast.success("Structured report saved and scored");
+                      fetchData();
+                    } catch (e: any) {
+                      toast.error(e.message || "Structured scoring failed");
+                    }
+                  }}
+                >
+                  Save & Score (From Manual Data)
+                </Button>
+
+                <Button
+                  variant="outline"
+                  onClick={async () => {
+                    try {
+                      // Optionally run AI scoring based on manual data by invoking the same server function
+                      const token = session?.access_token;
+                      const resp = await fetch(`/api/supabase/functions/v1/score-inspection`, {
+                        method: "POST",
+                        headers: {
+                          "Content-Type": "application/json",
+                          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                        },
+                        body: JSON.stringify({ inspection_id: inspection.id }),
+                      });
+                      const body = await resp.json().catch(() => ({}));
+                      if (!resp.ok) throw new Error(body?.error || `AI scoring failed (${resp.status})`);
+                      toast.success("AI scoring started/completed");
+                      fetchData();
+                    } catch (e: any) {
+                      toast.error(e.message || "AI scoring failed");
+                    }
+                  }}
+                >
+                  Run AI Scoring (Media)
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* AI Scores */}
         <ScoreCard
