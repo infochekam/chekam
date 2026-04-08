@@ -18,31 +18,44 @@ export function computeScores(data = {}) {
   const garbage = data.garbage_collection ? 1 : 0;
   const drainage = clamp((data.drainage_quality ?? 5) / 10);
   const drainageRisk = 1 - clamp(Number(data.drainage_altitude_risk ?? 0));
+  // generator + NEPA influence: normalize kva (cap at 100), and nepa hours per day
+  const generatorPresent = !!data.generator_present;
+  const generatorKva = Number(data.generator_kva ?? 0);
+  const generatorScore = generatorPresent ? clamp(generatorKva > 0 ? generatorKva / 100 : 0.5) : 0;
+  const nepaHours = clamp(Number(data.nepa_hours_per_day ?? 0) / 24);
 
   const compoundSub = [
-    { v: power, w: 0.35 },
-    { v: water, w: 0.2 },
-    { v: garbage, w: 0.15 },
-    { v: drainage, w: 0.2 },
-    { v: drainageRisk, w: 0.1 },
+    { v: power, w: 0.3 },
+    { v: generatorScore, w: 0.15 },
+    { v: nepaHours, w: 0.15 },
+    { v: water, w: 0.15 },
+    { v: garbage, w: 0.1 },
+    { v: drainage, w: 0.1 },
+    { v: drainageRisk, w: 0.05 },
   ];
   const compound = weightedAvg(compoundSub);
 
   // Security
+  const cctv = data.cctv_present ? 1 : 0;
   const secSub = [
-    { v: data.fenced ? 1 : 0, w: 0.3 },
-    { v: data.in_estate ? 1 : 0, w: 0.25 },
-    { v: clamp((data.gate_quality ?? 5) / 10), w: 0.25 },
-    { v: data.guards_present ? 1 : 0, w: 0.2 },
+    { v: data.fenced ? 1 : 0, w: 0.25 },
+    { v: data.in_estate ? 1 : 0, w: 0.2 },
+    { v: clamp((data.gate_quality ?? 5) / 10), w: 0.2 },
+    { v: data.guards_present ? 1 : 0, w: 0.15 },
+    { v: cctv, w: 0.2 },
   ];
   const security = weightedAvg(secSub);
 
   // Location
   const proximityNorm = clamp(1 - ((data.proximity_km ?? 5) / 10));
   const neighborhood = clamp((data.neighborhood_score ?? 5) / 10);
+  const roadAccess = clamp((data.road_access ?? 5) / 10);
+  const floodScore = 1 - clamp((data.flood_risk ?? 5) / 10);
   const location = weightedAvg([
-    { v: proximityNorm, w: 0.6 },
-    { v: neighborhood, w: 0.4 },
+    { v: proximityNorm, w: 0.4 },
+    { v: neighborhood, w: 0.2 },
+    { v: roadAccess, w: 0.2 },
+    { v: floodScore, w: 0.2 },
   ]);
 
   // Privacy & Landlord
