@@ -12,7 +12,7 @@ import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import DocumentUploadTab from "@/components/property/DocumentUploadTab";
 import PropertyLinkTab from "@/components/property/PropertyLinkTab";
-import ManualEntryTab from "@/components/property/ManualEntryTab";
+import ManualEntrySimple from "@/components/property/ManualEntrySimple";
 import logo from "@/assets/chekamlogo.png";
 
 type SubmissionMethod = "document_upload" | "property_link" | "manual_entry";
@@ -235,7 +235,7 @@ const SubmitProperty = () => {
                 <PropertyLinkTab link={propertyLink} onLinkChange={setPropertyLink} />
               </TabsContent>
               <TabsContent value="manual_entry" className="mt-5">
-                <ManualEntryTab data={manualData} onChange={setManualData} />
+                <ManualEntrySimple data={manualData} onChange={setManualData} />
               </TabsContent>
             </Tabs>
 
