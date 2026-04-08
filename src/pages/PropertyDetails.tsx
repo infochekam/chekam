@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, FileText, Link2, Map, AlertCircle, CheckCircle2, Clock, FileBarChart, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import ManualEntryTab from "@/components/property/ManualEntryTab";
 
 interface Property {
   id: string;
@@ -48,7 +49,7 @@ interface Inspector {
 
 const PropertyDetails = () => {
   const { propertyId } = useParams<{ propertyId: string }>();
-  const { user } = useAuth();
+  const { user, session, hasRole } = useAuth();
   const navigate = useNavigate();
   
   const [property, setProperty] = useState<Property | null>(null);
@@ -56,6 +57,8 @@ const PropertyDetails = () => {
   const [inspection, setInspection] = useState<Inspection | null>(null);
   const [inspector, setInspector] = useState<Inspector | null>(null);
   const [loading, setLoading] = useState(true);
+  const [manualData, setManualData] = useState<any>(null);
+  const isInspectorUser = hasRole("inspector") && user?.id;
 
   useEffect(() => {
     const fetchProperty = async () => {
@@ -93,6 +96,11 @@ const PropertyDetails = () => {
         if (!inspErr && insp) {
           const inspection = insp as any;
           setInspection(inspection);
+
+          // seed manual data from inspector_report if available
+          if (inspection.inspector_report) {
+            setManualData(inspection.inspector_report);
+          }
 
           // Fetch inspector details if assigned
           if (inspection.inspector_id) {
@@ -254,6 +262,98 @@ const PropertyDetails = () => {
                 <div className="pt-2 border-t border-border space-y-1">
                   <p className="text-xs font-medium text-muted-foreground">Inspector Notes</p>
                   <p className="text-sm">{inspection.notes}</p>
+                </div>
+              )}
+
+              {/* Inspector actions: allow assigned inspector to update structured data and run AI scoring */}
+              {inspection.inspector_id && user?.id && inspection.inspector_id === user.id && (
+                <div className="pt-4 border-t border-border space-y-4">
+                  <h3 className="text-sm font-semibold">Inspector Report</h3>
+                  <div>
+                    {/* Lazy load ManualEntryTab with existing data */}
+                    <ManualEntryTab data={manualData || {}} onChange={setManualData} />
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={async () => {
+                        try {
+                          const token = session?.access_token;
+                          const resp = await fetch(`/api/inspections/${inspection.id}/score-structured`, {
+                            method: "POST",
+                            headers: {
+                              "Content-Type": "application/json",
+                              ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                            },
+                            body: JSON.stringify(manualData || {}),
+                          });
+                          const body = await resp.json().catch(() => ({}));
+                          if (!resp.ok) throw new Error(body?.error || `Save failed (${resp.status})`);
+                          toast.success("Structured report saved and scored");
+                          // refresh inspection
+                          const { data: refreshed } = await supabase.from("inspections").select("*", { count: "exact" }).match({ id: inspection.id }).single();
+                          if (refreshed) setInspection(refreshed as any);
+                        } catch (e: any) {
+                          toast.error(e.message || "Failed to save report");
+                        }
+                      }}
+                    >
+                      Save & Score
+                    </Button>
+
+                    <Button
+                      variant="outline"
+                      onClick={async () => {
+                        try {
+                          const token = session?.access_token;
+                          const resp = await fetch(`/api/supabase/functions/v1/score-inspection`, {
+                            method: "POST",
+                            headers: {
+                              "Content-Type": "application/json",
+                              ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                            },
+                            body: JSON.stringify({ inspection_id: inspection.id }),
+                          });
+                          const body = await resp.json().catch(() => ({}));
+                          if (!resp.ok) throw new Error(body?.error || `AI scoring failed (${resp.status})`);
+                          toast.success("AI scoring started/completed");
+                          const { data: refreshed } = await supabase.from("inspections").select("*", { count: "exact" }).match({ id: inspection.id }).single();
+                          if (refreshed) setInspection(refreshed as any);
+                        } catch (e: any) {
+                          toast.error(e.message || "AI scoring failed");
+                        }
+                      }}
+                    >
+                      Run AI Scoring
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {/* Debug info for inspectors: show IDs and allow claiming if unassigned */}
+              {hasRole("inspector") && (
+                <div className="pt-4 border-t border-border text-xs text-muted-foreground">
+                  <p>Debug: inspection.inspector_id = {inspection.inspector_id || "(none)"}</p>
+                  <p>Your user.id = {user?.id || "(none)"}</p>
+                  {(!inspection.inspector_id || inspection.inspector_id === null) && (
+                    <div className="mt-2">
+                      <Button
+                        size="sm"
+                        onClick={async () => {
+                          try {
+                            const { error } = await (supabase as any).from("inspections").update({ inspector_id: user?.id }).eq("id", inspection.id);
+                            if (error) throw error;
+                            toast.success("You have claimed this inspection");
+                            const { data: refreshed } = await supabase.from("inspections").select("*").match({ id: inspection.id }).single();
+                            if (refreshed) setInspection(refreshed as any);
+                          } catch (e: any) {
+                            toast.error(e.message || "Failed to claim inspection");
+                          }
+                        }}
+                      >
+                        Claim Inspection
+                      </Button>
+                    </div>
+                  )}
                 </div>
               )}
 

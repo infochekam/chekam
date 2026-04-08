@@ -1,6 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import { createClient } from "@supabase/supabase-js";
+import { computeScores } from "./computeScores.js";
 import jwt from "jsonwebtoken";
 import cookieParser from "cookie-parser";
 import cors from "cors";
@@ -429,6 +430,93 @@ app.get("/auth/me", async (req, res) => {
 app.post("/auth/logout", (req, res) => {
   res.clearCookie("chekam_session");
   res.json({ ok: true });
+});
+
+// Structured scoring endpoint - inspector submits structured data
+app.post("/api/inspections/:id/score-structured", async (req, res) => {
+  try {
+    const inspectionId = req.params.id;
+
+    // Determine user id either from server JWT cookie or from Supabase access token
+    let userId = null;
+
+    // Try server cookie first
+    const cookieToken = req.cookies?.chekam_session;
+    if (cookieToken) {
+      try {
+        const parsed = jwt.verify(cookieToken, SESSION_SECRET);
+        userId = parsed.sub;
+      } catch (e) {
+        // invalid server token, fall through to try supabase access token
+        console.warn("Invalid server session cookie, will try Supabase token");
+      }
+    }
+
+    // If no server cookie userId, try Supabase client access token from Authorization header
+    if (!userId) {
+      const authHeader = req.headers?.authorization;
+      if (!authHeader || !authHeader.startsWith("Bearer ")) return res.status(401).json({ error: "Not authenticated" });
+      const clientToken = authHeader.replace("Bearer ", "");
+      try {
+        const supabaseAuth = createClient(SUPABASE_URL, process.env.SUPABASE_ANON_KEY, {
+          global: { headers: { Authorization: `Bearer ${clientToken}` } },
+        });
+        const { data: userData, error: authError } = await supabaseAuth.auth.getUser();
+        if (authError || !userData?.user) return res.status(401).json({ error: "Unauthorized" });
+        userId = userData.user.id;
+      } catch (e) {
+        console.error("Supabase token verification failed:", e);
+        return res.status(401).json({ error: "Invalid session" });
+      }
+    }
+
+    if (!supabaseAdmin) return res.status(500).json({ error: "Supabase admin not configured" });
+
+    // Check roles (must be inspector or admin)
+    const { data: roleData } = await supabaseAdmin
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", userId)
+      .in("role", ["admin", "inspector"]);
+    if (!roleData || roleData.length === 0) return res.status(403).json({ error: "Insufficient permissions" });
+
+    const inspectorData = req.body || {};
+
+    // Compute scores using the helper
+    const scores = computeScores(inspectorData);
+
+    // Persist inspector_report on inspections
+    const { error: updateReportErr } = await supabaseAdmin
+      .from("inspections")
+      .update({ inspector_report: inspectorData, inspector_id: payload.sub })
+      .eq("id", inspectionId);
+    if (updateReportErr) throw updateReportErr;
+
+    // Replace existing inspection_scores for this inspection
+    await supabaseAdmin.from("inspection_scores").delete().eq("inspection_id", inspectionId);
+
+    const scoreRows = scores.categories.map((c) => ({
+      inspection_id: inspectionId,
+      category: c.category,
+      score: c.score,
+      remarks: c.remarks || null,
+    }));
+
+    const { error: insertErr } = await supabaseAdmin.from("inspection_scores").insert(scoreRows);
+    if (insertErr) throw insertErr;
+
+    // Update inspection overall score and summary
+    const { error: updateErr } = await supabaseAdmin
+      .from("inspections")
+      .update({ overall_score: scores.overall_score, ai_summary: scores.summary, status: "scored" })
+      .eq("id", inspectionId);
+    if (updateErr) throw updateErr;
+
+    return res.json({ success: true, scores });
+  } catch (e) {
+    console.error("/api/inspections/:id/score-structured error:", e);
+    return res.status(400).json({ error: e instanceof Error ? e.message : "Unknown error" });
+  }
 });
 
 // SPA fallback - only for non-static routes

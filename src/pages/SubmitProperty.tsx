@@ -23,10 +23,15 @@ interface UploadedFile {
 }
 
 const SubmitProperty = () => {
-  const { user } = useAuth();
+  const { user, session, hasRole } = useAuth();
   const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
   const [tab, setTab] = useState<SubmissionMethod>("document_upload");
+
+  // If user is an inspector, default to manual entry once roles are available
+  useEffect(() => {
+    if (hasRole("inspector")) setTab("manual_entry");
+  }, [hasRole]);
   const [title, setTitle] = useState("");
 
   // Document upload state
@@ -36,12 +41,36 @@ const SubmitProperty = () => {
   const [propertyLink, setPropertyLink] = useState("");
 
   // Manual entry state
-  const [manualData, setManualData] = useState({
+  const [manualData, setManualData] = useState<any>({
     address: "",
     city: "",
     state: "",
     propertyType: "",
     description: "",
+
+    power_reliability: 5,
+    water_availability: false,
+    garbage_collection: false,
+    drainage_quality: 5,
+    drainage_altitude_risk: 0,
+
+    fenced: false,
+    in_estate: false,
+    gate_quality: 5,
+    guards_present: false,
+
+    proximity_km: 5,
+    neighborhood_score: 5,
+
+    landlord_on_site: false,
+    shared_household: 0,
+    tenant_privacy_score: 5,
+
+    bedrooms: 1,
+    ventilation_score: 5,
+    bathrooms: 1,
+    kitchen_quality: 5,
+    parking_space: false,
   });
 
   const validate = (): boolean => {
@@ -93,6 +122,15 @@ const SubmitProperty = () => {
 
       if (propError) throw propError;
 
+      // 1.5 Create an inspection for this property
+      const { data: inspection, error: inspErr } = await supabase
+        .from("inspections")
+        .insert({ property_id: property.id, status: "pending" })
+        .select("id")
+        .single();
+
+      if (inspErr) throw inspErr;
+
       // 2. Upload documents if applicable
       if (tab === "document_upload" && files.length > 0) {
         for (const f of files) {
@@ -115,6 +153,25 @@ const SubmitProperty = () => {
             });
 
           if (docErr) throw docErr;
+        }
+      }
+      // 3. If manual entry, send structured data to scoring endpoint
+      if (tab === "manual_entry") {
+        try {
+          const token = session?.access_token;
+          const resp = await fetch(`/api/inspections/${inspection.id}/score-structured`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            },
+            body: JSON.stringify(manualData),
+          });
+          const body = await resp.json().catch(() => ({}));
+          if (!resp.ok) throw new Error(body?.error || `Scoring failed (${resp.status})`);
+        } catch (e: any) {
+          console.error("Structured scoring error:", e);
+          toast.error(e.message || "Structured scoring failed");
         }
       }
 

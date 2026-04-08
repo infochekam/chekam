@@ -123,8 +123,8 @@ const Dashboard = () => {
                 <CardTitle className="text-base">Inspector Tools</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <p className="text-sm text-muted-foreground">Conduct virtual inspections and upload media.</p>
-                <Button size="sm" variant="secondary" asChild><Link to="/inspections">View Inspections</Link></Button>
+                <p className="text-sm text-muted-foreground">Conduct virtual inspections and upload media (assigned inspections).</p>
+                <Button size="sm" variant="secondary" asChild><Link to="/inspections?view=assigned">Assigned Inspections</Link></Button>
               </CardContent>
             </Card>
           )}
@@ -134,10 +134,10 @@ const Dashboard = () => {
               <Video className="h-5 w-5 text-primary" />
               <CardTitle className="text-base">Virtual Inspections</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
-              <p className="text-sm text-muted-foreground">View property inspections with AI-powered facility scoring.</p>
-              <Button size="sm" variant="outline" asChild><Link to="/inspections">Browse Inspections</Link></Button>
-            </CardContent>
+              <CardContent className="space-y-3">
+                <p className="text-sm text-muted-foreground">View property inspections with AI-powered facility scoring.</p>
+                <Button size="sm" variant="outline" asChild><Link to="/inspections">Browse Inspections</Link></Button>
+              </CardContent>
           </Card>
 
           <Card className="border-primary/20">
