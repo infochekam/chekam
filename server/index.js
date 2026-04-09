@@ -548,6 +548,54 @@ app.post("/api/inspections/:id/score-structured", async (req, res) => {
   }
 });
 
+// Admin property report export (aggregated JSON)
+app.get("/api/properties/:id/report", async (req, res) => {
+  try {
+    const propertyId = req.params.id;
+
+    // Authenticate and require admin
+    let userId = null;
+    const cookieToken = req.cookies?.chekam_session;
+    if (cookieToken) {
+      try { const parsed = jwt.verify(cookieToken, SESSION_SECRET); userId = parsed.sub; } catch {}
+    }
+    if (!userId) {
+      const authHeader = req.headers?.authorization;
+      if (authHeader && authHeader.startsWith("Bearer ")) {
+        const clientToken = authHeader.replace("Bearer ", "");
+        const anonKeyForAuth = process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
+        const supabaseAuth = createClient(SUPABASE_URL, anonKeyForAuth, { global: { headers: { Authorization: `Bearer ${clientToken}` } } });
+        const r = await supabaseAuth.auth.getUser();
+        if (r?.data?.user) userId = r.data.user.id;
+      }
+    }
+    if (!userId) return res.status(401).json({ error: "Not authenticated" });
+
+    // require admin role
+    if (!supabaseAdmin) return res.status(500).json({ error: "Supabase admin not configured" });
+    const { data: roles } = await supabaseAdmin.from("user_roles").select("role").eq("user_id", userId).in("role", ["admin"]);
+    if (!roles || roles.length === 0) return res.status(403).json({ error: "Insufficient permissions" });
+
+    // Aggregate property
+    const { data: property } = await supabaseAdmin.from("properties").select("*").eq("id", propertyId).single();
+    const { data: docs } = await supabaseAdmin.from("property_documents").select("*").eq("property_id", propertyId).order("created_at");
+    const { data: inspections } = await supabaseAdmin.from("inspections").select("*").eq("property_id", propertyId).order("created_at");
+    const inspectionDetails = [];
+    if (inspections && inspections.length > 0) {
+      for (const insp of inspections) {
+        const { data: scores } = await supabaseAdmin.from("inspection_scores").select("category,score,remarks").eq("inspection_id", insp.id).order("created_at");
+        const { data: media } = await supabaseAdmin.from("inspection_media").select("id,file_name,file_path,media_type,label,uploaded_by,created_at").eq("inspection_id", insp.id).order("created_at");
+        inspectionDetails.push({ inspection: insp, scores: scores || [], media: media || [] });
+      }
+    }
+
+    return res.json({ property, documents: docs || [], inspections: inspectionDetails });
+  } catch (e) {
+    console.error("/api/properties/:id/report error:", e.message || e);
+    return res.status(500).json({ error: "Report generation failed" });
+  }
+});
+
 // SPA fallback - only for non-static routes
 app.get("*", (req, res) => {
   // Don't serve index.html for static assets or API calls

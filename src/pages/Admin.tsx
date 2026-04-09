@@ -10,6 +10,7 @@ import type { Database } from "@/integrations/supabase/types";
 import AdminStats from "@/components/admin/AdminStats";
 import UserManagement from "@/components/admin/UserManagement";
 import PropertyReview from "@/components/admin/PropertyReview";
+import AdminProperties from "@/components/admin/AdminProperties";
 import InspectionManagement from "@/components/admin/InspectionManagement";
 import DocumentVerification from "@/components/admin/DocumentVerification";
 
@@ -111,6 +112,7 @@ const Admin = () => {
             <TabsTrigger value="inspections">Inspections</TabsTrigger>
             <TabsTrigger value="documents">Documents</TabsTrigger>
             <TabsTrigger value="properties">Property Review</TabsTrigger>
+            <TabsTrigger value="all_properties">All Properties</TabsTrigger>
           </TabsList>
           <TabsContent value="users">
             <UserManagement users={users} loading={loading} onRefresh={fetchUsers} />
@@ -123,6 +125,9 @@ const Admin = () => {
           </TabsContent>
           <TabsContent value="properties">
             <PropertyReview />
+          </TabsContent>
+          <TabsContent value="all_properties">
+            <AdminProperties />
           </TabsContent>
         </Tabs>
       </main>
