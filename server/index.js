@@ -437,6 +437,10 @@ app.post("/api/inspections/:id/score-structured", async (req, res) => {
   try {
     const inspectionId = req.params.id;
 
+    console.log(`[Server] score-structured called for inspection ${inspectionId}`);
+    console.log(`[Server] Incoming cookies:`, req.cookies);
+    console.log(`[Server] Incoming Authorization:`, req.headers.authorization?.substring(0, 40));
+
     // Determine user id either from server JWT cookie or from Supabase access token
     let userId = null;
 
@@ -488,7 +492,7 @@ app.post("/api/inspections/:id/score-structured", async (req, res) => {
     // Persist inspector_report on inspections
     const { error: updateReportErr } = await supabaseAdmin
       .from("inspections")
-      .update({ inspector_report: inspectorData, inspector_id: payload.sub })
+      .update({ inspector_report: inspectorData, inspector_id: userId })
       .eq("id", inspectionId);
     if (updateReportErr) throw updateReportErr;
 
