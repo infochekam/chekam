@@ -69,7 +69,7 @@ interface InspectionRecord {
 
 const PropertyReport = () => {
   const { propertyId } = useParams<{ propertyId: string }>();
-  const { user } = useAuth();
+  const { user, hasRole } = useAuth();
   const reportRef = useRef<HTMLDivElement>(null);
   const [property, setProperty] = useState<Property | null>(null);
   const [docs, setDocs] = useState<DocRecord[]>([]);
@@ -80,12 +80,11 @@ const PropertyReport = () => {
     const load = async () => {
       if (!propertyId || !user) return;
 
-      const { data: prop } = await supabase
-        .from("properties")
-        .select("*")
-        .eq("id", propertyId)
-        .eq("user_id", user.id)
-        .single();
+      // Admins may view any property's report; regular users may view only their own
+      const isAdmin = hasRole("admin");
+      let propQuery = supabase.from("properties").select("*").eq("id", propertyId);
+      if (!isAdmin) propQuery = propQuery.eq("user_id", user.id);
+      const { data: prop } = await propQuery.single();
 
       if (!prop) {
         setLoading(false);

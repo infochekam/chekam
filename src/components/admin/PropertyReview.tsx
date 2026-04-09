@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CheckCircle, XCircle, Loader2 } from "lucide-react";
+import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -113,6 +114,23 @@ const PropertyReview = () => {
     fetchProperties();
   };
 
+  const createInspection = async (propertyId: string) => {
+    try {
+      // Check if an inspection already exists for this property
+      const { data: existing } = await supabase.from("inspections").select("id").eq("property_id", propertyId).limit(1);
+      if (existing && existing.length > 0) {
+        toast(`Inspection already exists for this property`);
+        return;
+      }
+      const { error } = await supabase.from("inspections").insert({ property_id: propertyId, status: "pending" });
+      if (error) throw error;
+      toast.success("Inspection created successfully");
+      fetchProperties();
+    } catch (e: any) {
+      toast.error(e.message || "Failed to create inspection");
+    }
+  };
+
   return (
     <Card>
       <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -200,6 +218,13 @@ const PropertyReview = () => {
                             Review
                           </Button>
                         )}
+                        <Link to={`/property/${p.id}`} className="text-sm">
+                          <Button size="sm" variant="ghost">View</Button>
+                        </Link>
+                        <Link to={`/property/${p.id}/report`} className="text-sm">
+                          <Button size="sm" variant="outline">Report</Button>
+                        </Link>
+                        <Button size="sm" variant="secondary" onClick={() => createInspection(p.id)}>Create Inspection</Button>
                       </div>
                     </TableCell>
                   </TableRow>
