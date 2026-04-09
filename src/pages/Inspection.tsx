@@ -217,6 +217,7 @@ const Inspection = () => {
                       const token = session?.access_token;
                       const resp = await fetch(`/api/inspections/${inspection.id}/score-structured`, {
                         method: "POST",
+                        credentials: "include",
                         headers: {
                           "Content-Type": "application/json",
                           ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -243,6 +244,7 @@ const Inspection = () => {
                       const token = session?.access_token;
                       const resp = await fetch(`/api/supabase/functions/v1/score-inspection`, {
                         method: "POST",
+                        credentials: "include",
                         headers: {
                           "Content-Type": "application/json",
                           ...(token ? { Authorization: `Bearer ${token}` } : {}),

@@ -86,7 +86,7 @@ const ManualEntryTab = ({ data, onChange }: ManualEntryTabProps) => {
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="property-type">Property Type</Label>
-          <Select value={data.propertyType} onValueChange={(v) => update("propertyType", v)}>
+          <Select value={data.propertyType ?? ""} onValueChange={(v) => update("propertyType", v)}>
             <SelectTrigger id="property-type"><SelectValue placeholder="Select type" /></SelectTrigger>
             <SelectContent>
               {PROPERTY_TYPES.map((t) => (
@@ -97,7 +97,7 @@ const ManualEntryTab = ({ data, onChange }: ManualEntryTabProps) => {
         </div>
         <div className="space-y-2">
           <Label htmlFor="state">State</Label>
-          <Select value={data.state} onValueChange={(v) => update("state", v)}>
+          <Select value={data.state ?? ""} onValueChange={(v) => update("state", v)}>
             <SelectTrigger id="state"><SelectValue placeholder="Select state" /></SelectTrigger>
             <SelectContent>
               {NIGERIAN_STATES.map((s) => (
