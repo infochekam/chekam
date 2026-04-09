@@ -462,7 +462,14 @@ app.post("/api/inspections/:id/score-structured", async (req, res) => {
       if (!authHeader || !authHeader.startsWith("Bearer ")) return res.status(401).json({ error: "Not authenticated" });
       const clientToken = authHeader.replace("Bearer ", "");
       try {
-          const supabaseAuth = createClient(SUPABASE_URL, process.env.SUPABASE_ANON_KEY, {
+          // Use anon key when available, otherwise fall back to service role key (server-side)
+          const anonKeyForAuth = process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
+          if (!anonKeyForAuth) {
+            console.error('[Server] Missing SUPABASE_ANON_KEY and SUPABASE_SERVICE_ROLE_KEY; cannot verify token');
+            return res.status(500).json({ error: 'Server not configured for token verification' });
+          }
+          console.log('[Server] Using', process.env.SUPABASE_ANON_KEY ? 'ANON key' : 'SERVICE_ROLE key', 'to verify client token');
+          const supabaseAuth = createClient(SUPABASE_URL, anonKeyForAuth, {
             global: { headers: { Authorization: `Bearer ${clientToken}` } },
           });
           const result = await supabaseAuth.auth.getUser();
