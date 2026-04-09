@@ -469,11 +469,24 @@ app.post("/api/inspections/:id/score-structured", async (req, res) => {
             return res.status(500).json({ error: 'Server not configured for token verification' });
           }
           console.log('[Server] Using', process.env.SUPABASE_ANON_KEY ? 'ANON key' : 'SERVICE_ROLE key', 'to verify client token');
-          const supabaseAuth = createClient(SUPABASE_URL, anonKeyForAuth, {
-            global: { headers: { Authorization: `Bearer ${clientToken}` } },
-          });
-          const result = await supabaseAuth.auth.getUser();
+          const tryVerify = async (keyToUse) => {
+            const client = createClient(SUPABASE_URL, keyToUse, {
+              global: { headers: { Authorization: `Bearer ${clientToken}` } },
+            });
+            const r = await client.auth.getUser();
+            return r;
+          };
+
+          let result = await tryVerify(anonKeyForAuth);
           console.log('[Server] supabaseAuth.getUser result:', JSON.stringify(result?.data || result?.error || result));
+
+          // If anon key produced Invalid API key and we have a service role key, retry with it
+          if (result?.error && String(result.error.message || result.error).toLowerCase().includes('invalid api key') && process.env.SUPABASE_SERVICE_ROLE_KEY && process.env.SUPABASE_SERVICE_ROLE_KEY !== anonKeyForAuth) {
+            console.log('[Server] anon key invalid; retrying token verification with service role key');
+            result = await tryVerify(process.env.SUPABASE_SERVICE_ROLE_KEY);
+            console.log('[Server] retry result:', JSON.stringify(result?.data || result?.error || result));
+          }
+
           const { data: userData, error: authError } = result;
           if (authError || !userData?.user) {
             console.warn('[Server] Supabase token verification failed', authError);
