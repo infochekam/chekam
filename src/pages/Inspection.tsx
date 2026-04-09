@@ -235,33 +235,6 @@ const Inspection = () => {
                 >
                   Save & Score (From Manual Data)
                 </Button>
-
-                <Button
-                  variant="outline"
-                  onClick={async () => {
-                    try {
-                      // Optionally run AI scoring based on manual data by invoking the same server function
-                      const token = session?.access_token;
-                      const resp = await fetch(`/api/supabase/functions/v1/score-inspection`, {
-                        method: "POST",
-                        credentials: "include",
-                        headers: {
-                          "Content-Type": "application/json",
-                          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-                        },
-                        body: JSON.stringify({ inspection_id: inspection.id }),
-                      });
-                      const body = await resp.json().catch(() => ({}));
-                      if (!resp.ok) throw new Error(body?.error || `AI scoring failed (${resp.status})`);
-                      toast.success("AI scoring started/completed");
-                      fetchData();
-                    } catch (e: any) {
-                      toast.error(e.message || "AI scoring failed");
-                    }
-                  }}
-                >
-                  Run AI Scoring (Media)
-                </Button>
               </div>
             </CardContent>
           </Card>
