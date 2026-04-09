@@ -462,12 +462,17 @@ app.post("/api/inspections/:id/score-structured", async (req, res) => {
       if (!authHeader || !authHeader.startsWith("Bearer ")) return res.status(401).json({ error: "Not authenticated" });
       const clientToken = authHeader.replace("Bearer ", "");
       try {
-        const supabaseAuth = createClient(SUPABASE_URL, process.env.SUPABASE_ANON_KEY, {
-          global: { headers: { Authorization: `Bearer ${clientToken}` } },
-        });
-        const { data: userData, error: authError } = await supabaseAuth.auth.getUser();
-        if (authError || !userData?.user) return res.status(401).json({ error: "Unauthorized" });
-        userId = userData.user.id;
+          const supabaseAuth = createClient(SUPABASE_URL, process.env.SUPABASE_ANON_KEY, {
+            global: { headers: { Authorization: `Bearer ${clientToken}` } },
+          });
+          const result = await supabaseAuth.auth.getUser();
+          console.log('[Server] supabaseAuth.getUser result:', JSON.stringify(result?.data || result?.error || result));
+          const { data: userData, error: authError } = result;
+          if (authError || !userData?.user) {
+            console.warn('[Server] Supabase token verification failed', authError);
+            return res.status(401).json({ error: "Unauthorized", details: authError?.message || null });
+          }
+          userId = userData.user.id;
       } catch (e) {
         console.error("Supabase token verification failed:", e);
         return res.status(401).json({ error: "Invalid session" });
