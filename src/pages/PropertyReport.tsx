@@ -347,7 +347,7 @@ const PropertyReport = () => {
                     <div className="flex items-center gap-2">
                       <Badge variant="outline" className="capitalize">{insp.status.replace("_", " ")}</Badge>
                       {insp.overall_score !== null && (
-                        <Badge variant="default">{insp.overall_score}/100</Badge>
+                        <Badge variant="default">{insp.overall_score.toFixed(1)}/10</Badge>
                       )}
                     </div>
                   </div>
@@ -356,17 +356,17 @@ const PropertyReport = () => {
                     <p className="text-sm text-muted-foreground">{insp.ai_summary}</p>
                   )}
 
-                  {insp.scores.length > 0 && (
-                    <div className="grid gap-2">
-                      {insp.scores.map((s, i) => (
-                        <div key={i} className="flex items-center gap-3">
-                          <span className="text-xs text-muted-foreground w-32 shrink-0">{s.category}</span>
-                          <Progress value={s.score} className="h-2 flex-1" />
-                          <span className="text-xs font-medium w-8 text-right">{s.score}</span>
+                      {insp.scores.length > 0 && (
+                        <div className="grid gap-2">
+                          {insp.scores.map((s, i) => (
+                            <div key={i} className="flex items-center gap-3">
+                              <span className="text-xs text-muted-foreground w-32 shrink-0">{s.category}</span>
+                              <Progress value={s.score * 10} className="h-2 flex-1" />
+                              <span className="text-xs font-medium w-12 text-right">{s.score.toFixed(1)}/10</span>
+                            </div>
+                          ))}
                         </div>
-                      ))}
-                    </div>
-                  )}
+                      )}
                 </div>
               ))}
             </CardContent>
